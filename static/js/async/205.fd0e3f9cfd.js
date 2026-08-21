@@ -1,0 +1,1 @@
+"use strict";(self.rspackChunk_logue_biome_plugins=self.rspackChunk_logue_biome_plugins||[]).push([[205],{4020(){}}]);
