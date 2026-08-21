@@ -1,0 +1,15 @@
+// [Rationale] TypeScript enums generate runtime code, hurt tree-shaking, and introduce
+// implicit numeric mappings. Use union types instead.
+//
+// ✗  enum Color { Red = 'red', Green = 'green' }
+// ✓  export type Color = 'red' | 'green';
+//    export const Color = { red: ..., green: ... } as const;
+
+sequential {
+  `enum $name { $_ }` where {
+    register_diagnostic(message="`enum` is forbidden. Use a union type instead: `export type $name = 'value1' | 'value2'`", severity="error")
+  },
+  `const enum $name { $_ }` where {
+    register_diagnostic(message="`const enum` is forbidden. Use a union type instead: `export type $name = 'value1' | 'value2'`", severity="error")
+  }
+}

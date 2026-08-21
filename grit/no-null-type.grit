@@ -1,0 +1,28 @@
+// [Rationale] `undefined` is TypeScript's canonical "no value" (`Partial<T>` uses it).
+// Mixing `null` creates two ways to express the same absence and complicates every
+// consuming type. Use optional (`?`) instead.
+//
+// ✗  function process(str: string | null) {}
+// ✓  function process(str?: string) {}
+//
+// Exception — JSON transformation boundary only:
+//   const normalized = { value: apiData.value ?? undefined };
+
+sequential {
+  // Function parameter: T | null
+  `function $fn($param: $type | null) { $_ }` where {
+    register_diagnostic(message="Avoid `| null` in type annotations. Use optional (`?`) instead: `$param?: $type`. Exception: JSON transformation boundaries only.", severity="warn")
+  },
+  // Function parameter: null | T
+  `function $fn($param: null | $type) { $_ }` where {
+    register_diagnostic(message="Avoid `null |` in type annotations. Use optional (`?`) instead: `$param?: $type`. Exception: JSON transformation boundaries only.", severity="warn")
+  },
+  // Arrow function parameter: T | null
+  `($param: $type | null) => $_` where {
+    register_diagnostic(message="Avoid `| null` in type annotations. Use optional (`?`) instead: `$param?: $type`. Exception: JSON transformation boundaries only.", severity="warn")
+  },
+  // Variable / property type annotation: T | null
+  `$_: $type | null = $_` where {
+    register_diagnostic(message="Avoid `| null` in type annotations. Use `| undefined` or make the property optional. Exception: JSON transformation boundaries only.", severity="warn")
+  }
+}

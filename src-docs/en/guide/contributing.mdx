@@ -1,0 +1,101 @@
+# Contributing
+
+## Adding a New Rule
+
+### 1 — Write the GritQL file
+
+Create a `.grit` file in `grit/`:
+
+```sh
+touch grit/my-new-rule.grit
+```
+
+A minimal rule:
+
+```js
+// [Rationale] One sentence explaining why this pattern is banned.
+//
+// ✗  bad pattern
+// ✓  good alternative
+
+`pattern to match $variable` where {
+  register_diagnostic(
+    message = "Explain the violation and what to do instead.",
+    severity = "error"  // or "warn"
+  )
+}
+```
+
+### 2 — Document it in AGENTS.md
+
+Add a `### rule-name` section under `## Lint Rules` in `AGENTS.md`.
+Include: what it checks, the rationale, a ✗/✓ example, and any exception conditions.
+
+### 3 — Add a docs page
+
+Create `docs/rules/my-new-rule.mdx` following the structure of the existing rule pages.
+
+### 4 — Register it in the sidebar
+
+Add an entry to `rspress.config.ts` under `sidebar['/rules/']`.
+
+### 5 — Test
+
+```sh
+pnpm test
+```
+
+---
+
+## Rule Naming
+
+Use `kebab-case`. Names describe what is **disallowed** or **preferred**:
+
+| Prefix      | When to use                     | Example                  |
+| ----------- | ------------------------------- | ------------------------ |
+| `no-*`      | Bans a specific pattern         | `no-null-type`           |
+| `prefer-*`  | Promotes an alternative         | `prefer-union-over-enum` |
+| `enforce-*` | Structural / architectural rule | `enforce-pure-src`       |
+
+---
+
+## GritQL Quick Reference
+
+### Pattern match
+
+```js
+`code $variable { $body }` where { ... }
+```
+
+### Register a diagnostic
+
+```js
+register_diagnostic(
+  message = "Human-readable message.",
+  severity = "error" | "warn" | "info"
+)
+```
+
+### Conditions
+
+```js
+// File path must match
+$file_path.matches("^src/"),
+
+// Captured variable must match a regex
+$path.matches(".*(storybook|demo).*"),
+
+// Combine with comma (AND)
+$file_path.matches("^src/"),
+$path.matches(".*(storybook).*"),
+```
+
+---
+
+## Severity Guide
+
+| Severity | Use when                                                        |
+| -------- | --------------------------------------------------------------- |
+| `error`  | The pattern is **always wrong** in this codebase — no ambiguity |
+| `warn`   | The pattern is **usually wrong** but has legitimate exceptions  |
+| `info`   | Informational nudge; not a blocker                              |

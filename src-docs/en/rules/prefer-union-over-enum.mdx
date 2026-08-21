@@ -1,0 +1,65 @@
+# prefer-union-over-enum
+
+<cds-tag type="red">error</cds-tag>
+
+`enum` and `const enum` declarations are forbidden. Use union types instead.
+
+## What it checks
+
+Any `enum Name { ... }` or `const enum Name { ... }` declaration.
+
+## Why
+
+TypeScript enums have several drawbacks that union types avoid entirely:
+
+- **Runtime code.** A regular `enum` compiles to an IIFE that creates a reverse-mapping object — dead code for tree-shakers and extra bytes in every bundle.
+- **Implicit numeric mapping.** `enum Direction { Up, Down }` silently assigns `0` and `1`. Passing an arbitrary number where `Direction` is expected is a type error only sometimes.
+- **Import overhead.** Enums require a value import in addition to a type import, complicating barrel files and type-only imports.
+
+Union types are erased entirely at compile time and work naturally with `as const` objects for exhaustive maps.
+
+## Examples
+
+### ✗ Incorrect
+
+```ts
+enum Color {
+  Red = "red",
+  Green = "green",
+}
+const enum Direction {
+  Up,
+  Down,
+}
+```
+
+### ✓ Correct
+
+```ts
+// Type — erased at compile time
+export type Color = "red" | "green";
+
+// Array of valid values — useful for validation
+export const colors: Color[] = ["red", "green"];
+
+// Map to implementations — mirrors the enum use-case
+export const Color: Record<Color, ColorValue> = {
+  red: redColorValue,
+  green: greenColorValue,
+};
+```
+
+Consumers import only what they need:
+
+```ts
+import type { Color } from "./types/Color.d.ts";
+import { Color } from "./types/Color.ts"; // the const map
+```
+
+## Exceptions
+
+None. `enum` is never the right choice in this codebase.
+
+## Source
+
+[`grit/prefer-union-over-enum.grit`](https://github.com/logue/biome-rules/blob/main/grit/prefer-union-over-enum.grit)

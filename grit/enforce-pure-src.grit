@@ -1,0 +1,10 @@
+// 【根拠】srcディレクトリ内には、ソースコードと密結合なユニットテスト以外を含めてはなりません。
+// デモ（src-demo）やStorybookなどのコンテンツは、ライブラリを「外から見た状態」であるべきなため、srcの外に配置してください。
+
+contains `import $any from "$path"` where {
+  // 1. 解析対象ファイルが src/ 内にある場合
+  $filename <: r"^src/",
+  // 2. そのファイルが Storybook や デモ（Sandbox）のコードをインポートしようとしたらエラー
+  $path <: r".*(storybook|demo|sandbox|preview).*",
+  register_diagnostic(message="【規約根拠】src内には本番コードとテストコード以外含められません。Storybookやデモ等の外部視点のコンテンツは、srcディレクトリの外側に配置（src-demo等）し、外部モジュールとしてライブラリを参照してください。", severity="error")
+}
