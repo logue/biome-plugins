@@ -21,7 +21,7 @@ async function loadCarbonComponents(): Promise<void> {
 export function Layout() {
   useEffect(() => {
     // Apply Carbon g100 (dark) theme to the document root
-    document.documentElement.setAttribute('data-carbon-theme', 'g100');
+    document.documentElement.dataset.carbonTheme = 'g100';
     loadCarbonComponents().catch(console.error);
   }, []);
 

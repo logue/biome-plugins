@@ -1,21 +1,25 @@
 {
   "extends": "@tsconfig/node-lts/tsconfig.json",
   "include": [
-    "docs/**/*",
-    "@logue/rules/theme/**/*"
+    "env.d.ts",
+    "src-docs/**/*"
   ],
   "exclude": [
-    "node_modules/**/*",
-    "*.config.ts"
+    "**/node_modules"
   ],
   "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "docs",
+    "types": [
+      "@rsbuild/core/types",
+      "node"
+    ],
     "lib": [
       "DOM",
-      "ES2020"
+      "ESNext"
     ],
     "jsx": "react-jsx",
     "noEmit": true,
-    "skipLibCheck": true,
     "useDefineForClassFields": true,
     /* modules */
     "module": "ESNext",
@@ -26,9 +30,9 @@
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     /* type checking */
-    "strict": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.rspress.tsbuildinfo",
   },
   "mdx": {
     "checkMdx": true

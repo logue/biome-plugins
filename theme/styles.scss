@@ -4,7 +4,6 @@
 */
 @use "@carbon/styles" with (
   $use-per-family-plex: true,
-  // 個別フォントパッケージの構成を有効化
   $use-akamai-cdn: true
 );
 
@@ -18,6 +17,13 @@
 
 body {
   font-family: var(--font-sans);
+  /*
+    Carbon's reset sets body { background: var(--cds-background) } using the
+    default white theme. Override with Rspress's own vars so the dark/light
+    toggle keeps working. Rspress sets these correctly for each theme.
+  */
+  background-color: var(--rp-c-bg);
+  color: var(--rp-c-text-1);
 }
 
 code,

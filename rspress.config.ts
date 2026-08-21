@@ -27,6 +27,7 @@ export default defineConfig({
   // Site config
   title: pkg.name,
   description: pkg.description,
+  base: `/biome-plugins/`,
   icon: '/favicon.svg',
   lang: 'en',
   logo: {
