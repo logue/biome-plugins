@@ -1,0 +1,25 @@
+# ルール
+
+すべてのルールは [GritQL](https://docs.grit.io/) で記述され、Biome プラグインとして読み込まれます。
+
+各ルールファイルは独立しています。必要なものだけを読み込みましょう。
+
+## 利用可能なルール
+
+| ルール                                                     | 重要度                                          | チェック対象                                          |
+| ---------------------------------------------------------- | ----------------------------------------------- | ----------------------------------------------------- |
+| [enforce-pure-src](/ja/rules/enforce-pure-src)             | <cds-tag type="red" size="sm">error</cds-tag>   | `src/` 内に Storybook / demo のインポートはありません |
+| [prefer-union-over-enum](/ja/rules/prefer-union-over-enum) | <cds-tag type="red" size="sm">error</cds-tag>   | `enum` と `const enum` は禁止されています             |
+| [no-null-type](/ja/rules/no-null-type)                     | <cds-tag type="purple" size="sm">warn</cds-tag> | 型注釈位置での `\| null` の使用                       |
+
+## ルールの場所
+
+ルールは、このパッケージのルートにある `grit/` ディレクトリにあります。
+
+`biome.jsonc` のインポートパス:
+
+```
+node_modules/@logue/biome-plugins/grit/enforce-pure-src.grit
+node_modules/@logue/biome-plugins/grit/prefer-union-over-enum.grit
+node_modules/@logue/biome-plugins/grit/no-null-type.grit
+```

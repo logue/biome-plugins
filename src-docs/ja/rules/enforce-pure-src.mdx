@@ -1,0 +1,45 @@
+# enforce-pure-src
+
+<cds-tag type="red">error</cds-tag>
+
+`src/` ディレクトリには、プロダクション時のコードと、同じ場所に配置された単体テストのみを含める必要があります。
+
+Storybook、デモ、サンドボックスのコンテンツは、`src/` ディレクトリの外に配置する必要があります。
+
+## チェック対象
+
+`src/` ディレクトリをルートとするファイル内のインポート文で、`storybook`、`demo`、`sandbox`、または `preview` を含むパスに解決されるもの。
+
+## 理由
+
+ライブラリの `src/` ディレクトリは、パッケージの公開される表面を表します。
+
+デモコードとドキュメントコードは、ライブラリを **外部から**、つまり
+利用者の視点から見ています。これらを `src/` ディレクトリに混在させると、次の 2 つの問題が発生します。
+
+1. **バンドルへの意図しない混入** バンドラーがデモコードを誤って本番出力に取り込んでしまう可能性があります。
+2. **責任の所在が曖昧になる。** どのコードが製品に同梱され、どのコードがローカル開発専用なのかが不明確になる。
+
+​​外部視点のコンテンツは、同じディレクトリ（`src-docs/`、`src-demo/`など）に配置し、ライブラリを外部モジュールとして参照する。
+
+## 例
+
+### ✗ 誤り
+
+```ts
+// src/components/Button.ts
+import { ButtonDemo } from "../storybook/ButtonDemo";
+
+import preview from "../demo/preview";
+```
+
+### ✓ 正しい
+
+```ts
+// src-docs/components/ButtonDemo.ts ← src/ ディレクトリ外
+import { Button } from "@logue/my-lib"; // 外部参照として参照
+```
+
+## ソース
+
+[`grit/enforce-pure-src.grit`](https://github.com/logue/biome-plugins/blob/main/grit/enforce-pure-src.grit)

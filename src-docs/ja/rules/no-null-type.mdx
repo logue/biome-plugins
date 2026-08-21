@@ -1,0 +1,85 @@
+# no-null-type
+
+<cds-tag type="purple">warn</cds-tag>
+
+型注釈の位置では、`| null` は禁止されています。
+
+存在しない場合は、`undefined` またはオプションの `?` を使用してください。
+
+## チェック対象
+
+`| null` (または `null |`) が以下の場所に出現している場合：
+
+- 関数のパラメータ型注釈
+- アロー関数のパラメータ型注釈
+- 初期化子を持つ変数/プロパティ型注釈
+
+## 理由
+
+TypeScript には、「値がない」ことを表す方法が `null` と `undefined` の 2 つあります。
+
+これらを混在させると、呼び出し箇所ごとに認知的な負担が生じます。
+
+```ts
+// 呼び出し側は、null と undefined のどちらを渡すべきかを考えなければなりません。
+
+function process(str: string | null) {}
+```
+
+`undefined` は TypeScript における標準的な不在値です。
+
+- `Partial<T>` は `null` ではなく `undefined` を使用します。
+- オプショナルチェイニング (`?.`) と null 合体 (`??`) は `undefined` のために設計されました。
+- `JSON.stringify` は `undefined` 値を省略しますが、`null` はシリアライズします。`null` が適切なのは、シリアライズ時のみです (下記の例外を参照)。
+
+`undefined` のみを使用することで、コードベース内のすべての型が簡素化されます。
+
+## 例
+
+### ✗ 誤り
+
+```ts
+function process(str: string | null) {}
+
+const handler = (data: { value: string | null }) => {};
+
+let current: Item | null = null;
+```
+
+### ✓ 正しい
+
+```ts
+function process(str?: string) {}
+
+const handler = (data: { value?: string }) => {};
+
+let current: Item | undefined;
+```
+
+## 例外 — JSON変換境界
+
+`JSON.parse`の直後では、データに`null`が含まれる可能性があります。
+
+境界で`undefined`に正規化してから、下流に渡します。
+
+```ts
+// ✓ 境界層 — ここではnullが許容されます
+const raw = JSON.parse(json) as { value: string | null };
+
+const normalized = {
+  value: raw.value ?? undefined,
+};
+
+// ✓ 下流 — undefinedのみ
+process(normalized.value);
+```
+
+<cds-inline-notification
+kind="warning"
+title="エラーではなく警告を表示する理由"
+subtitle="JSON境界コードでは誤検出が発生する可能性があります。各診断結果を手動で確認してください。"
+hide-close-button />
+
+## ソース
+
+[`grit/no-null-type.grit`](https://github.com/logue/biome-plugins/blob/main/grit/no-null-type.grit)

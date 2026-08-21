@@ -1,0 +1,12 @@
+[
+  {
+    "text": "ガイド",
+    "link": "/ja/guide/getting-started",
+    "activeMatch": "/ja/guide/"
+  },
+  {
+    "text": "ルール",
+    "link": "/ja/rules/",
+    "activeMatch": "/ja/rules/"
+  }
+]

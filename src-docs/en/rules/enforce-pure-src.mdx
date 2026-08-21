@@ -1,23 +1,46 @@
-# Rules
+# enforce-pure-src
 
-All rules are written in [GritQL](https://docs.grit.io/) and loaded as Biome plugins.
-Each rule file is independent — load only what you need.
+<cds-tag type="red">error</cds-tag>
 
-## Available Rules
+`src/` must contain only production code and co-located unit tests.
+Storybook, demo, and sandbox content must live outside `src/`.
 
-| Rule                                                    | Severity                                        | What it checks                            |
-| ------------------------------------------------------- | ----------------------------------------------- | ----------------------------------------- |
-| [enforce-pure-src](/rules/enforce-pure-src)             | <cds-tag type="red" size="sm">error</cds-tag>   | No Storybook / demo imports inside `src/` |
-| [prefer-union-over-enum](/rules/prefer-union-over-enum) | <cds-tag type="red" size="sm">error</cds-tag>   | `enum` and `const enum` are forbidden     |
-| [no-null-type](/rules/no-null-type)                     | <cds-tag type="purple" size="sm">warn</cds-tag> | `\| null` in type annotation positions    |
+## What it checks
 
-## Rule Locations
+Any import statement **inside a `src/`-rooted file** that resolves to a path
+containing `storybook`, `demo`, `sandbox`, or `preview`.
 
-Rules live in the `grit/` directory at the root of this package.
-Import paths for `biome.jsonc`:
+## Why
 
+A library's `src/` directory represents the published surface of the package.
+Demo and documentation code views the library **from the outside** — as a
+consumer would. Mixing them into `src/` creates two problems:
+
+1. **Accidental inclusion in the bundle.** Bundlers can mis-tree-shake demo
+   code into the production output.
+2. **Blurred responsibility.** It becomes unclear which code ships and which
+   is only for local development.
+
+Place external-perspective content in a sibling directory (`src-docs/`,
+`src-demo/`, etc.) and reference the library as an external module there.
+
+## Examples
+
+### ✗ Incorrect
+
+```ts
+// src/components/Button.ts
+import { ButtonDemo } from "../storybook/ButtonDemo";
+import preview from "../demo/preview";
 ```
-node_modules/@logue/biome-plugins/grit/enforce-pure-src.grit
-node_modules/@logue/biome-plugins/grit/prefer-union-over-enum.grit
-node_modules/@logue/biome-plugins/grit/no-null-type.grit
+
+### ✓ Correct
+
+```ts
+// src-docs/components/ButtonDemo.ts  ← outside src/
+import { Button } from "@logue/my-lib"; // reference as external
 ```
+
+## Source
+
+[`grit/enforce-pure-src.grit`](https://github.com/logue/biome-plugins/blob/main/grit/enforce-pure-src.grit)

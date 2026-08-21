@@ -1,0 +1,71 @@
+# はじめに
+
+## 前提条件
+
+- [Biome](https://biomejs.dev/) 2.5 以降
+- pnpm 10 以降 (または npm / yarn)
+
+## インストール
+
+```sh
+pnpm add -D @logue/biome-plugins
+```
+
+## 設定
+
+`biome.jsonc` に、必要なルールを登録してください。
+
+```jsonc
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.9/schema.json",
+  "plugins": [
+    {
+      "path": "./node_modules/@logue/biome-plugins/grit/enforce-pure-src.grit",
+    },
+    {
+      "path": "./node_modules/@logue/biome-plugins/grit/prefer-union-over-enum.grit",
+    },
+    {
+      "path": "./node_modules/@logue/biome-plugins/grit/no-null-type.grit",
+    },
+  ],
+}
+```
+
+<cds-inline-notification
+kind="info"
+title="rstack-library-starter"
+subtitle="rstack-library-starter テンプレートを使用すると、これらのルールは既に設定されています。"
+hide-close-button />
+
+## 検証
+
+Biome を実行して、ルールが有効になっていることを確認します。
+
+```sh
+pnpm biome lint .
+```
+
+意図的に違反するコードを記述し、診断メッセージが表示されることを確認します。
+
+```ts
+// prefer-union-over-enum がトリガーされるはずです → エラー
+enum Color {
+  Red = "red",
+}
+```
+
+## 選択的ロード
+
+必要なルールのみをロードできます。各`.grit`ファイルは独立しています。
+
+```jsonc
+{
+  "plugins": [
+    // 列挙ルールのみを読み込む
+    {
+      "path": "./node_modules/@logue/biome-plugins/grit/prefer-union-over-enum.grit",
+    },
+  ],
+}
+```

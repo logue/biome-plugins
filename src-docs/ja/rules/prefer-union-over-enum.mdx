@@ -1,0 +1,65 @@
+# prefer-union-over-enum
+
+<cds-tag type="red">error</cds-tag>
+
+`enum` および `const enum` の宣言は禁止されています。代わりにUnion型を使用してください。
+
+## チェック対象
+
+`enum Name { ... }` または `const enum Name { ... }` の宣言。
+
+## 理由
+
+TypeScript の enum には、共用型では完全に回避できるいくつかの欠点があります。
+
+- **ランタイム コード。** 通常の `enum` は、逆マッピング オブジェクトを作成する IIFE にコンパイルされます。これは、ツリーシェイカーにとってデッド コードであり、バンドルごとに余分なバイトが発生します。
+- **暗黙的な数値マッピング。** `enum Direction { Up, Down }` は、暗黙的に `0` と `1` を割り当てます。`Direction` が期待される場所に任意の数値を渡しても、型エラーになるのはごくまれです。
+- **インポートのオーバーヘッド。** 列挙型は型のインポートに加えて値のインポートも必要とするため、バレルファイルや型のみのインポートが複雑になります。
+
+共用型はコンパイル時に完全に消去され、`as const` オブジェクトと自然に連携して、網羅的なマップを作成できます。
+
+## 例
+
+### ✗ 誤り
+
+```ts
+enum Color {
+  Red = "red",
+  Green = "green",
+}
+const enum Direction {
+  Up,
+  Down,
+}
+```
+
+### ✓ 正しい
+
+```ts
+// 型 — コンパイル時に消去されます
+export type Color = "red" | "green";
+
+// 有効な値の配列 — 検証に役立ちます
+export const colors: Color[] = ["red", "green"];
+
+// 実装へのマップ — enum の使用例を反映
+export const Color: Record<Color, ColorValue> = {
+  red: redColorValue,
+  green: greenColorValue,
+};
+```
+
+コンシューマーは必要なものだけをインポートします。
+
+```ts
+import type { Color } from "./types/Color.d.ts";
+import { Color } from "./types/Color.ts"; // const マップ
+```
+
+## 例外
+
+なし。このコードベースでは `enum` は決して適切な選択肢ではありません。
+
+## ソース
+
+[`grit/prefer-union-over-enum.grit`](https://github.com/logue/biome-plugins/blob/main/grit/prefer-union-over-enum.grit)
