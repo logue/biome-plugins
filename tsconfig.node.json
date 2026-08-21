@@ -2,16 +2,15 @@
   "extends": "@tsconfig/node-lts/tsconfig.json",
   "include": [
     "env.d.ts",
+    "package.json",
     "rsbuild.config.*",
     "rslib.config.*",
     "rslint.config.*",
-    "rspress.config.*",
-    "package.json",
-    "rslint.config.ts"
+    "rspress.config.*"
   ],
   "exclude": [
-    "**/node_modules",
-    "**/.*/"
+    "**/.*/",
+    "**/node_modules"
   ],
   "compilerOptions": {
     "composite": true,

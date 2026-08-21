@@ -6,5 +6,5 @@ contains `import $any from "$path"` where {
   $filename <: r"^src/",
   // 2. そのファイルが Storybook や デモ（Sandbox）のコードをインポートしようとしたらエラー
   $path <: r".*(storybook|demo|sandbox|preview).*",
-  register_diagnostic(message="【規約根拠】src内には本番コードとテストコード以外含められません。Storybookやデモ等の外部視点のコンテンツは、srcディレクトリの外側に配置（src-demo等）し、外部モジュールとしてライブラリを参照してください。", severity="error")
+  register_diagnostic(message="The `src` directory may only contain production code and test code. External content such as Storybooks and demos should be placed outside the `src` directory (e.g., `src-demo`) and referenced as an external module.", severity="error")
 }

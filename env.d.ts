@@ -1,3 +1,5 @@
+declare module '*.scss';
+
 interface ImportMetaEnv {
   readonly SSG_MD: boolean;
 }
