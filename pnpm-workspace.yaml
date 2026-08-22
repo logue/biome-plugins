@@ -21,3 +21,6 @@ allowBuilds:
   "@ibm/plex-sans-thai-looped": false
   "@ibm/plex-serif": false
   "@parcel/watcher": true
+# Do not enforce minimum release age for dependencies.
+# Version selection is delegated to package.json constraints.
+minimumReleaseAge: 0
