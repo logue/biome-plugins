@@ -26,14 +26,8 @@
   "packageManager": "pnpm@11.22.0",
   "files": [
     "grit",
-    "plugins",
-    "skills"
+    "biome-plugin.json"
   ],
-  "pi": {
-    "skills": [
-      "skills"
-    ]
-  },
   "scripts": {
     "dev": "rspress dev",
     "lint": "run-s 'lint:*' --",

@@ -8,7 +8,7 @@
 [![X Follow](https://img.shields.io/twitter/follow/logue256?style=plastic)](https://twitter.com/logue256)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/logue?label=Sponsor&logo=github&color=ea4aaa)](https://github.com/sponsors/logue)
 
-see <https://logue.dev/biome-plugins>.
+see <https://logue.dev/biome-plugins/>.
 
 ## License
 
