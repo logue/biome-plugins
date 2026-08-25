@@ -7,22 +7,21 @@
 //
 // Exception — JSON transformation boundary only:
 //   const normalized = { value: apiData.value ?? undefined };
+//
+// [Implementation note] GritQL's snippet parser cannot bind a metavariable that sits
+// directly in front of a `:` type annotation (`$param: $type` never matches), so this
+// rule targets the CST nodes that carry a type annotation directly (function/arrow
+// parameters, variable declarators, class fields) and checks their source text for a
+// `null` union member.
 
-sequential {
-  // Function parameter: T | null
-  `function $fn($param: $type | null) { $_ }` where {
-    register_diagnostic(message="Avoid `| null` in type annotations. Use optional (`?`) instead: `$param?: $type`. Exception: JSON transformation boundaries only.", severity="warn")
-  },
-  // Function parameter: null | T
-  `function $fn($param: null | $type) { $_ }` where {
-    register_diagnostic(message="Avoid `null |` in type annotations. Use optional (`?`) instead: `$param?: $type`. Exception: JSON transformation boundaries only.", severity="warn")
-  },
-  // Arrow function parameter: T | null
-  `($param: $type | null) => $_` where {
-    register_diagnostic(message="Avoid `| null` in type annotations. Use optional (`?`) instead: `$param?: $type`. Exception: JSON transformation boundaries only.", severity="warn")
-  },
-  // Variable / property type annotation: T | null
-  `$_: $type | null = $_` where {
-    register_diagnostic(message="Avoid `| null` in type annotations. Use `| undefined` or make the property optional. Exception: JSON transformation boundaries only.", severity="warn")
-  }
+engine biome(1.0)
+language js(typescript)
+
+or {
+  JsFormalParameter(),
+  JsVariableDeclarator(),
+  JsPropertyClassMember()
+} as $m where {
+  $m <: r".*\bnull\b.*",
+  register_diagnostic(span=$m, message="Avoid `null` in type annotations. Use optional (`?`) instead, or `| undefined`. Exception: JSON transformation boundaries only.", severity="warn")
 }

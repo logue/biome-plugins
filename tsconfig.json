@@ -9,6 +9,10 @@
     // For document site
     {
       "path": "./tsconfig.rspress.json"
+    },
+    // For test
+    {
+      "path": "./tsconfig.rstest.json"
     }
   ]
 }

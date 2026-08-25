@@ -1,7 +1,7 @@
 {
-	"rules": [
-		"grit/enforce-pure-src.grit",
-		"grit/prefer-union-over-enum.grit",
-		"grit/no-null-type.grit"
-	]
+  "rules": [
+    "grit/enforce-pure-src.grit",
+    "grit/prefer-union-over-enum.grit",
+    "grit/no-null-type.grit"
+  ]
 }

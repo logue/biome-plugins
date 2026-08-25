@@ -4,12 +4,14 @@
 // ✗  enum Color { Red = 'red', Green = 'green' }
 // ✓  export type Color = 'red' | 'green';
 //    export const Color = { red: ..., green: ... } as const;
+//
+// [Implementation note] GritQL's snippet parser cannot bind a metavariable to an
+// enum's member list (`enum $name { $_ }` never matches), so this rule targets the
+// `TsEnumDeclaration` CST node directly, which also covers `const enum` uniformly.
 
-sequential {
-  `enum $name { $_ }` where {
-    register_diagnostic(message="`enum` is forbidden. Use a union type instead: `export type $name = 'value1' | 'value2'`", severity="error")
-  },
-  `const enum $name { $_ }` where {
-    register_diagnostic(message="`const enum` is forbidden. Use a union type instead: `export type $name = 'value1' | 'value2'`", severity="error")
-  }
+engine biome(1.0)
+language js(typescript)
+
+TsEnumDeclaration() as $m where {
+  register_diagnostic(span=$m, message="`enum` (including `const enum`) is forbidden. Use a union type instead: `export type Name = 'value1' | 'value2'`", severity="error")
 }

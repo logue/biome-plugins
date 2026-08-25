@@ -165,5 +165,24 @@
       // that may contain comments for documentation purposes.
       "allowComments": true
     }
-  }
+  },
+  "overrides": [
+    {
+      // テストファイルを指定（環境に合わせて拡張子を調整してください）
+      "includes": [
+        "**/*.test.*",
+        "**/*.spec.ts",
+        "**/*.test.tsx",
+        "**/*.spec.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            // テストファイル内のみ any を許可する
+            "noExplicitAny": "off"
+          }
+        }
+      }
+    }
+  ]
 }

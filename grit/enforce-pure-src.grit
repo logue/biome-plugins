@@ -1,10 +1,10 @@
 // 【根拠】srcディレクトリ内には、ソースコードと密結合なユニットテスト以外を含めてはなりません。
 // デモ（src-demo）やStorybookなどのコンテンツは、ライブラリを「外から見た状態」であるべきなため、srcの外に配置してください。
 
-contains `import $any from "$path"` where {
-  // 1. 解析対象ファイルが src/ 内にある場合
-  $filename <: r"^src/",
+contains `import $any from $path` as $m where {
+  // 1. 解析対象ファイルが src/ 内にある場合（$filename は絶対パスで渡ってくる）
+  $filename <: r".*/src/.*",
   // 2. そのファイルが Storybook や デモ（Sandbox）のコードをインポートしようとしたらエラー
-  $path <: r".*(storybook|demo|sandbox|preview).*",
-  register_diagnostic(message="The `src` directory may only contain production code and test code. External content such as Storybooks and demos should be placed outside the `src` directory (e.g., `src-demo`) and referenced as an external module.", severity="error")
+  $path <: r".*(?:storybook|demo|sandbox|preview).*",
+  register_diagnostic(span=$m, message="The `src` directory may only contain production code and test code. External content such as Storybooks and demos should be placed outside the `src` directory (e.g., `src-demo`) and referenced as an external module.", severity="error")
 }
