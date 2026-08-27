@@ -1,0 +1,11 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.5.10/schema.json",
+	"name": "@logue/biome-plugins",
+	"version": "0.0.2",
+	// GritQLなどで書いたカスタムルールのファイルを指定
+	"rules": [
+		"grit/enforce-pure-src.grit",
+		"grit/prefer-union-over-enum.grit",
+		"grit/no-null-type.grit"
+	]
+}
