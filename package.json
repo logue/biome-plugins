@@ -15,7 +15,7 @@
     "email": "logue@hotmail.co.jp",
     "url": "https://logue.dev/"
   },
-  "homepage": "https://logue.dev/biome-plugins",
+  "homepage": "https://github.com/logue/biome-plugins",
   "repository": {
     "type": "git",
     "url": "git@github.com:logue/biome-plugins.git"
