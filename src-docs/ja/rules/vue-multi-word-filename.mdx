@@ -1,0 +1,68 @@
+# vue-multi-word-filename
+
+<cds-tag type="red">error</cds-tag>
+
+Vue コンポーネントのファイル名は、複数ワードの PascalCase（2語以上）でなければなりません。
+
+## 対象
+
+ベース名が1語の PascalCase である `.vue` ファイル（例: `Todo.vue`、`Button.vue`、`Header.vue`）。
+
+## 理由
+
+[Vue.js 公式スタイルガイド](https://vuejs.org/style-guide/rules-essential.html#use-multi-word-component-names)の必須ルールとして、コンポーネント名に複数ワードを使うことが要求されています。1語のコンポーネント名は、既存および将来の HTML 要素名と衝突するリスクがあります。
+
+## 例外
+
+以下のファイルはこのルールの対象外です。
+
+- `index.vue` — コンベンションとして認められたエントリポイント
+- `pages/` ディレクトリ以下のファイル — Nuxt / Vue Router の規約に従うページコンポーネントは除外
+
+## 例
+
+### ✗ 違反
+
+```
+# ファイル名
+Todo.vue
+Button.vue
+Header.vue
+```
+
+```vue
+<!-- Todo.vue -->
+<template>
+  <div class="todo">
+    <slot />
+  </div>
+</template>
+```
+
+### ✓ 適正
+
+```
+# ファイル名
+TodoList.vue
+BaseButton.vue
+TheHeader.vue
+index.vue          ← 慣例的に除外
+pages/about.vue    ← pages/ ディレクトリのため除外
+```
+
+```vue
+<!-- TodoList.vue -->
+<template>
+  <ul class="todo-list">
+    <slot />
+  </ul>
+</template>
+```
+
+## 制限事項
+
+ルールは「ファイル名に大文字が2つ以上含まれる」ことを PascalCase 複数ワードの判定基準とします。`UICard.vue` のように略語が2つの大文字を含む場合は検出されません。厳密に2語を強制したい場合は `UiCard.vue` や `CardUI.vue` などに改名してください。
+
+## ソース
+
+[`grit/vue-multi-word-filename.grit`](https://github.com/logue/biome-rules/blob/main/grit/vue-multi-word-filename.grit)

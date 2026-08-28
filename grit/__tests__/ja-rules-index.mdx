@@ -1,0 +1,27 @@
+# ルール一覧
+
+すべてのルールは [GritQL](https://docs.grit.io/) で記述され、Biome プラグインとして読み込まれます。
+各ルールファイルは独立しているため、必要なものだけを選んで使用できます。
+
+## 利用可能なルール
+
+| ルール                                                                      | 重大度                                          | 検出内容                                          |
+| --------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------- |
+| [enforce-pure-src](/rules/enforce-pure-src)                                 | <cds-tag type="red" size="sm">error</cds-tag>   | `src/` 内への Storybook / デモ用インポートを禁止  |
+| [prefer-union-over-enum](/rules/prefer-union-over-enum)                     | <cds-tag type="red" size="sm">error</cds-tag>   | `enum` および `const enum` を禁止                 |
+| [no-null-type](/rules/no-null-type)                                         | <cds-tag type="purple" size="sm">warn</cds-tag> | 型アノテーションでの `\| null` を検出             |
+| [vue-multi-word-filename](/rules/vue-multi-word-filename)                   | <cds-tag type="red" size="sm">error</cds-tag>   | Vue ファイル名が複数ワード PascalCase でない場合を検出 |
+| [enforce-attribute-order](/rules/enforce-attribute-order)                   | <cds-tag type="purple" size="sm">warn</cds-tag> | 隣接する属性のグループ順序違反を検出              |
+
+## ルールファイルの場所
+
+ルールはパッケージルートの `grit/` ディレクトリに配置されています。
+`biome.jsonc` でのインポートパス:
+
+```
+node_modules/@logue/biome-plugins/grit/enforce-pure-src.grit
+node_modules/@logue/biome-plugins/grit/prefer-union-over-enum.grit
+node_modules/@logue/biome-plugins/grit/no-null-type.grit
+node_modules/@logue/biome-plugins/grit/vue-multi-word-filename.grit
+node_modules/@logue/biome-plugins/grit/enforce-attribute-order.grit
+```

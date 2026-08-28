@@ -1,0 +1,83 @@
+# enforce-attribute-order
+
+<cds-tag type="purple">warn</cds-tag>
+
+HTML/Vue/JSX/Svelte attributes must be written in the prescribed group order, and static attributes must come before dynamic ones within the same group.
+
+## What it checks
+
+Adjacent attribute pairs whose group order is inverted. The rule covers `.jsx`, `.tsx`, and `.vue` files.
+
+## Why
+
+A consistent attribute order makes component markup scannable at a glance. The ordering below is derived from the [Vue.js official style guide](https://vuejs.org/style-guide/rules-recommended.html#element-attribute-order).
+
+## Group order (0 → 10)
+
+| # | Group | Attributes |
+|---|-------|-----------|
+| 0 | Control Flow / Definition | `v-is`, `v-for`, `v-if` / `v-else-if` / `v-else`, `v-show`, `v-cloak`, `v-pre`, `v-once`; JSX: `key`; Svelte: `{#each}` / `{#if}` |
+| 1 | Unique ID | `id`, `name` |
+| 2 | Two-Way Binding / Ref | `v-model`, `v-slot`, `bind:*`, `ref` |
+| 3 | Class | `class` (Vue/HTML), `className` (JSX) — static before dynamic (`:class`) |
+| 4 | Semantic | `alt`, `crossorigin`, `for` / `htmlFor`, `href`, `integrity`, `lang`, `rel`, `src`, `title`, `type` |
+| 5 | Sizing | `height`, `width` |
+| 6 | Style | `style` |
+| 7 | Other | remaining attributes, alphabetical |
+| 8 | Accessibility | `role`, `aria-*` |
+| 9 | Data | `data-*` |
+| 10 | Events | `on*` (JSX), `@*` (Vue), `on:*` (Svelte); `v-html`, `v-text` |
+
+Within a group, write static values before dynamic bindings.
+
+## Examples
+
+### ✗ Incorrect (JSX)
+
+```tsx
+// Event before className
+<Button onClick={handleClick} className="btn">Click</Button>
+
+// className before id
+<div className="card" id="main-card" />
+
+// aria before className
+<nav aria-label="main" className="nav" />
+```
+
+### ✓ Correct (JSX)
+
+```tsx
+<Button className="btn" onClick={handleClick}>Click</Button>
+<div id="main-card" className="card" />
+<nav className="nav" aria-label="main" />
+```
+
+### ✗ Incorrect (Vue)
+
+```vue
+<!-- Event before class -->
+<button @click="handleClick" class="btn">Click</button>
+
+<!-- Dynamic :class before static class -->
+<div :class="dynamicClass" class="base-class" />
+
+<!-- aria before class -->
+<nav aria-label="main navigation" class="nav" />
+```
+
+### ✓ Correct (Vue)
+
+```vue
+<button class="btn" @click="handleClick">Click</button>
+<div class="base-class" :class="dynamicClass" />
+<nav class="nav" aria-label="main navigation" />
+```
+
+## Limitations
+
+GritQL is a pattern-matching language, not an imperative one. This rule can only detect **adjacent** out-of-order attribute pairs. Non-adjacent violations (e.g., three or more attributes where the first and third are swapped) are not detected. Full multi-attribute ordering will require native Biome support in a future release.
+
+## Source
+
+[`grit/enforce-attribute-order.grit`](https://github.com/logue/biome-rules/blob/main/grit/enforce-attribute-order.grit)

@@ -34,6 +34,8 @@ function process(str: string | null) {}
 
 `undefined` のみを使用することで、コードベース内のすべての型が簡素化されます。
 
+詳細については、[TypeScript のコーディングガイドライン](https://github.com/microsoft/TypeScript/wiki/Coding-guidelines#null-and-undefined)をご覧になってください。
+
 ## 例
 
 ### ✗ 誤り
@@ -75,10 +77,10 @@ process(normalized.value);
 ```
 
 <cds-inline-notification
-kind="warning"
-title="エラーではなく警告を表示する理由"
-subtitle="JSON境界コードでは誤検出が発生する可能性があります。各診断結果を手動で確認してください。"
-hide-close-button />
+  kind="warning"
+  title="エラーではなく警告を表示する理由"
+  subtitle="JSON境界コードでは誤検出が発生する可能性があります。各診断結果を手動で確認してください。"
+  hide-close-button />
 
 ## ソース
 

@@ -1,5 +1,8 @@
-// 【根拠】srcディレクトリ内には、ソースコードと密結合なユニットテスト以外を含めてはなりません。
-// デモ（src-demo）やStorybookなどのコンテンツは、ライブラリを「外から見た状態」であるべきなため、srcの外に配置してください。
+// [Basis] The src directory should not contain anything other than source code and tightly coupled unit tests.
+// Demos (src-demo) and Storybook content should be placed outside of src because they should represent the library as it is viewed from the outside.
+//
+// ✗ import Demo from '../src-demo/MyDemo.vue' // Import demo within src/
+// ✓ import MyComponent from './MyComponent.vue' // Reference only to production code
 
 contains `import $any from $path` as $m where {
   // 1. 解析対象ファイルが src/ 内にある場合（$filename は絶対パスで渡ってくる）

@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import * as path from 'node:path';
+
 import { pluginSass } from '@rsbuild/plugin-sass';
 import { defineConfig } from '@rspress/core';
 
@@ -27,7 +28,6 @@ export default defineConfig({
   // Site config
   title: pkg.name,
   description: pkg.description,
-  base: `/biome-plugins/`,
   icon: '/favicon.svg',
   lang: 'en',
   logo: {
@@ -73,8 +73,19 @@ export default defineConfig({
         content: pkg.homepage,
       },
     ],
+    nav: [
+      {
+        text: 'Guide',
+        link: '/guide/getting-started',
+        activeMatch: '/guide/',
+      },
+      {
+        text: 'Rules',
+        link: '/rules/',
+        activeMatch: '/rules/',
+      },
+    ],
     sidebar: {
-      // English
       '/guide/': [
         {
           text: 'Guide',
@@ -113,49 +124,13 @@ export default defineConfig({
                   text: 'no-null-type',
                   link: '/rules/no-null-type',
                 },
-              ],
-            },
-          ],
-        },
-      ],
-      // Japanese
-      '/ja/guide/': [
-        {
-          text: 'ガイド',
-          items: [
-            {
-              text: 'はじめに',
-              link: '/ja/guide/getting-started',
-            },
-            {
-              text: 'コントリビューション',
-              link: '/ja/guide/contributing',
-            },
-          ],
-        },
-      ],
-      '/ja/rules/': [
-        {
-          text: 'ルール',
-          items: [
-            {
-              text: '概要',
-              link: '/ja/rules/',
-            },
-            {
-              text: 'GritQL ルール',
-              items: [
                 {
-                  text: 'enforce-pure-src',
-                  link: '/ja/rules/enforce-pure-src',
+                  text: 'vue-multi-word-filename',
+                  link: '/rules/vue-multi-word-filename',
                 },
                 {
-                  text: 'prefer-union-over-enum',
-                  link: '/ja/rules/prefer-union-over-enum',
-                },
-                {
-                  text: 'no-null-type',
-                  link: '/ja/rules/no-null-type',
+                  text: 'enforce-attribute-order',
+                  link: '/rules/enforce-attribute-order',
                 },
               ],
             },

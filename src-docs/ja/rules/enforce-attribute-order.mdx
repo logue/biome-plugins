@@ -1,0 +1,83 @@
+# enforce-attribute-order
+
+<cds-tag type="purple">warn</cds-tag>
+
+HTML/Vue/JSX/Svelte の属性は、定められたグループ順で記述し、同一グループ内では静的属性を動的バインディングより前に記述しなければなりません。
+
+## 対象
+
+グループ順が逆になっている隣接属性ペア。`.jsx`・`.tsx`・`.vue` ファイルが対象です。
+
+## 理由
+
+属性順を統一することでマークアップが一目で読みやすくなります。下記の順序は [Vue.js 公式スタイルガイド](https://vuejs.org/style-guide/rules-recommended.html#element-attribute-order)に準拠しています。
+
+## グループ順 (0 → 10)
+
+| # | グループ | 属性 |
+|---|---------|-----|
+| 0 | 制御フロー / 定義 | `v-is`, `v-for`, `v-if` / `v-else-if` / `v-else`, `v-show`, `v-cloak`, `v-pre`, `v-once`; JSX: `key`; Svelte: `{#each}` / `{#if}` |
+| 1 | 一意 ID | `id`, `name` |
+| 2 | 双方向バインディング / Ref | `v-model`, `v-slot`, `bind:*`, `ref` |
+| 3 | クラス | `class`（Vue/HTML）, `className`（JSX）— 静的 → 動的（`:class`） |
+| 4 | セマンティクス | `alt`, `crossorigin`, `for` / `htmlFor`, `href`, `integrity`, `lang`, `rel`, `src`, `title`, `type` |
+| 5 | サイズ | `height`, `width` |
+| 6 | スタイル | `style` |
+| 7 | その他 | 残りの属性（アルファベット順） |
+| 8 | アクセシビリティ | `role`, `aria-*` |
+| 9 | データ属性 | `data-*` |
+| 10 | イベント | `on*`（JSX）, `@*`（Vue）, `on:*`（Svelte）; `v-html`, `v-text` |
+
+同一グループ内では静的な値を動的バインディングより前に記述してください。
+
+## 例
+
+### ✗ 違反（JSX）
+
+```tsx
+// イベントが className より前
+<Button onClick={handleClick} className="btn">Click</Button>
+
+// className が id より前
+<div className="card" id="main-card" />
+
+// aria が className より前
+<nav aria-label="main" className="nav" />
+```
+
+### ✓ 適正（JSX）
+
+```tsx
+<Button className="btn" onClick={handleClick}>Click</Button>
+<div id="main-card" className="card" />
+<nav className="nav" aria-label="main" />
+```
+
+### ✗ 違反（Vue）
+
+```vue
+<!-- イベントが class より前 -->
+<button @click="handleClick" class="btn">Click</button>
+
+<!-- 動的 :class が 静的 class より前 -->
+<div :class="dynamicClass" class="base-class" />
+
+<!-- aria が class より前 -->
+<nav aria-label="main navigation" class="nav" />
+```
+
+### ✓ 適正（Vue）
+
+```vue
+<button class="btn" @click="handleClick">Click</button>
+<div class="base-class" :class="dynamicClass" />
+<nav class="nav" aria-label="main navigation" />
+```
+
+## 制限事項
+
+GritQL はパターンマッチング言語のため、検出できるのは **隣接する2属性の順序違反** のみです。3属性以上の組み合わせで最初と3番目が逆順になっているケース（非隣接）は検出されません。完全な属性順序チェックは、Biome ネイティブのルール対応後に拡充予定です。
+
+## ソース
+
+[`grit/enforce-attribute-order.grit`](https://github.com/logue/biome-rules/blob/main/grit/enforce-attribute-order.grit)

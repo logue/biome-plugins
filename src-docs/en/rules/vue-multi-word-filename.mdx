@@ -1,0 +1,68 @@
+# vue-multi-word-filename
+
+<cds-tag type="red">error</cds-tag>
+
+Vue component filenames must use multi-word PascalCase (two or more words).
+
+## What it checks
+
+Any `.vue` file whose basename contains only one PascalCase word — for example `Todo.vue`, `Button.vue`, or `Header.vue`.
+
+## Why
+
+The [Vue.js official style guide](https://vuejs.org/style-guide/rules-essential.html#use-multi-word-component-names) requires multi-word component names as an essential rule. Single-word names risk collision with existing and future HTML elements.
+
+## Exceptions
+
+The following files are excluded from this rule:
+
+- `index.vue` — a conventional entry point, not a named component
+- Files under a `pages/` directory — page components follow Nuxt / Vue Router conventions and are excluded
+
+## Examples
+
+### ✗ Incorrect
+
+```
+# Filenames
+Todo.vue
+Button.vue
+Header.vue
+```
+
+```vue
+<!-- Todo.vue -->
+<template>
+  <div class="todo">
+    <slot />
+  </div>
+</template>
+```
+
+### ✓ Correct
+
+```
+# Filenames
+TodoList.vue
+BaseButton.vue
+TheHeader.vue
+index.vue       ← excluded by convention
+pages/about.vue ← excluded (pages directory)
+```
+
+```vue
+<!-- TodoList.vue -->
+<template>
+  <ul class="todo-list">
+    <slot />
+  </ul>
+</template>
+```
+
+## Limitations
+
+The rule checks that the filename contains at least two uppercase letters (i.e. multi-word PascalCase). Abbreviations that happen to contain two uppercase letters such as `UICard.vue` are accepted — rename them to `UiCard.vue` or `CardUI.vue` if you need strict two-word enforcement.
+
+## Source
+
+[`grit/vue-multi-word-filename.grit`](https://github.com/logue/biome-rules/blob/main/grit/vue-multi-word-filename.grit)

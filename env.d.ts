@@ -1,9 +1,15 @@
 declare module '*.scss';
 
-interface ImportMetaEnv {
-  readonly SSG_MD: boolean;
-}
+import type { HTMLAttributes } from 'react';
 
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
+type CarbonWebComponentProps = HTMLAttributes<HTMLElement> & {
+  [attribute: string]: unknown;
+};
+
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements {
+      [tagName: `cds-${string}`]: CarbonWebComponentProps;
+    }
+  }
 }

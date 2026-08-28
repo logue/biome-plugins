@@ -53,7 +53,9 @@
       "a11y": {
         // Because they are often used for purposes that are meaningless
         // to screen readers, such as icons.
-        "noSvgWithoutTitle": "off"
+        "noSvgWithoutTitle": "off",
+        "noStaticElementInteractions": "off",
+        "useKeyWithClickEvents": "off"
       },
       "complexity": {
         // To remove the warning about processing long lines of code, uncomment the following line.
@@ -128,14 +130,14 @@
     },
     "parser": {
       // If you use Vue.
-      "vue": false
+      "vue": true
     }
   },
   "javascript": {
     // When you use CSS-in-JS (such as styled-components) or
     // GraphQL (such as Relay, Apollo etc.), you may want to enable
     // this option to avoid formatting issues with embedded snippets.
-    "experimentalEmbeddedSnippetsEnabled": false,
+    "experimentalEmbeddedSnippetsEnabled": true,
     "formatter": {
       "enabled": true,
       "quoteStyle": "single",
@@ -170,13 +172,14 @@
     {
       // テストファイルを指定（環境に合わせて拡張子を調整してください）
       "includes": [
-        "**/*.test.*",
-        "**/*.spec.ts",
-        "**/*.test.tsx",
-        "**/*.spec.tsx"
+        "./**/__tests__/*"
       ],
       "linter": {
         "rules": {
+          "a11y": "off",
+          "correctness": {
+            "noUnusedVariables": "off"
+          },
           "suspicious": {
             // テストファイル内のみ any を許可する
             "noExplicitAny": "off"

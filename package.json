@@ -1,6 +1,6 @@
 {
   "name": "@logue/biome-plugins",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Custom Biome lint rules written as GritQL plugins",
   "keywords": [
     "biome",
@@ -15,7 +15,7 @@
     "email": "logue@hotmail.co.jp",
     "url": "https://logue.dev/"
   },
-  "homepage": "https://github.com/logue/biome-plugins",
+  "homepage": "https://logue.dev/biome-plugins",
   "repository": {
     "type": "git",
     "url": "git@github.com:logue/biome-plugins.git"
@@ -35,7 +35,7 @@
   "scripts": {
     "dev": "rspress dev",
     "lint": "run-s 'lint:*' --",
-    "lint:rslint": "rslint .",
+    "lint:rslint": "rslint . --fix",
     "lint:biome": "biome check --write",
     "build": "rspress build",
     "preview": "rspress preview",
@@ -51,13 +51,13 @@
     "@biomejs/biome": ">=2.5.10"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.10",
-    "@carbon/styles": "^1.113.0",
-    "@carbon/web-components": "^2.61.0",
+    "@biomejs/biome": "^2.5.11",
+    "@carbon/styles": "^1.114.0",
+    "@carbon/web-components": "^2.62.0",
     "@changesets/cli": "^3.0.1",
     "@rsbuild/plugin-sass": "^2.0.1",
-    "@rslint/core": "^0.8.1",
-    "@rspress/core": "^2.0.20",
+    "@rslint/core": "^0.8.2",
+    "@rspress/core": "^2.0.21",
     "@rstest/core": "^0.11.10",
     "@tsconfig/node-lts": "^24.0.1",
     "@types/node": "^26.4.0",

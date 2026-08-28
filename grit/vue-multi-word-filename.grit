@@ -1,0 +1,24 @@
+// [Basis] According to the official Vue style guide, component filenames must be multi-word PascalCase. Single-word names (e.g., Todo.vue) are prohibited because they may conflict with built-in or future HTML elements.
+//
+// ✗ Todo.vue, Modal.vue, Button.vue
+// ✓ TodoList.vue, AppModal.vue, BaseButton.vue
+//
+// Exclusions:
+// - pages/ directory (using kebab-case in routing rules such as Nuxt)
+// - index.vue (conventional entry point for barrel exports)
+//
+// Reference: https://vuejs.org/style-guide/rules-essential.html#use-multi-word-component-names
+
+`<template>$_</template>` where {
+  // .vue ファイルのみ対象
+  $filename <: r"\.vue$",
+  // pages/ は Nuxt 等の規則で除外
+  not $filename <: r"(?:^|/)pages/",
+  // index.vue は慣例的に除外
+  not $filename <: r"(?:^|/)index\.vue$",
+  // ベース名に大文字が2つ以上ない = 単語1つ = 違反
+  // 例: /Todo.vue → T + odo（大文字1つ）→ マッチ = 違反
+  // 例: /TodoList.vue → T + odo + L + ist（大文字2つ）→ マッチしない = OK
+  not $filename <: r"(?:^|/)[A-Z][^/A-Z]*[A-Z][^/]*\.vue$",
+  register_diagnostic(message="Vue component filenames should be multi-word PascalCase (e.g., `TodoList.vue`). Single-word names may conflict with built-in HTML elements. https://vuejs.org/style-guide/rules-essential.html#use-multi-word-component-names", severity="error")
+}
