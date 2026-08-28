@@ -20,6 +20,7 @@ export default defineConfig({
   // Base config
   root: path.join(import.meta.dirname, 'src-docs'),
   outDir: 'docs',
+  base: `/biome-plugins/`,
   builderConfig: {
     plugins: [
       pluginSass(),
