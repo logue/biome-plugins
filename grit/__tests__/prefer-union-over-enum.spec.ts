@@ -1,5 +1,4 @@
 import { describe, expect, it } from '@rstest/core';
-
 import { checkWithRule } from './helpers/run-biome';
 
 const RULE = 'prefer-union-over-enum.grit';

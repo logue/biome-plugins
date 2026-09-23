@@ -1,6 +1,5 @@
 import { readFileSync } from 'node:fs';
 import * as path from 'node:path';
-
 import { pluginSass } from '@rsbuild/plugin-sass';
 import { defineConfig } from '@rspress/core';
 

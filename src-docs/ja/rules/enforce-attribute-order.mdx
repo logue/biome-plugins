@@ -2,37 +2,30 @@
 
 <cds-tag type="purple">warn</cds-tag>
 
-HTML/Vue/JSX/Svelte の属性は、定められたグループ順で記述し、同一グループ内では静的属性を動的バインディングより前に記述しなければなりません。
+JSX の属性は、定められたグループ順で記述しなければなりません。
 
 ## 対象
 
-グループ順が逆になっている隣接属性ペア。`.jsx`・`.tsx`・`.vue` ファイルが対象です。
+順序が逆になっている属性ペア。間に他の属性が挟まる非隣接なケースも検出します。`.jsx`・`.tsx` ファイルが対象です。
 
 ## 理由
 
-属性順を統一することでマークアップが一目で読みやすくなります。下記の順序は [Vue.js 公式スタイルガイド](https://vuejs.org/style-guide/rules-recommended.html#element-attribute-order)に準拠しています。
+属性順を統一することでマークアップが一目で読みやすくなります。下記の順序は [Vue.js 公式スタイルガイド](https://vuejs.org/style-guide/rules-recommended.html#element-attribute-order)と同じグループモデルのうち、JSX に関係する部分を採用しています。
 
-## グループ順 (0 → 10)
+## グループ順（チェック対象のみ）
 
-| # | グループ | 属性 |
-|---|---------|-----|
-| 0 | 制御フロー / 定義 | `v-is`, `v-for`, `v-if` / `v-else-if` / `v-else`, `v-show`, `v-cloak`, `v-pre`, `v-once`; JSX: `key`; Svelte: `{#each}` / `{#if}` |
-| 1 | 一意 ID | `id`, `name` |
-| 2 | 双方向バインディング / Ref | `v-model`, `v-slot`, `bind:*`, `ref` |
-| 3 | クラス | `class`（Vue/HTML）, `className`（JSX）— 静的 → 動的（`:class`） |
-| 4 | セマンティクス | `alt`, `crossorigin`, `for` / `htmlFor`, `href`, `integrity`, `lang`, `rel`, `src`, `title`, `type` |
-| 5 | サイズ | `height`, `width` |
-| 6 | スタイル | `style` |
-| 7 | その他 | 残りの属性（アルファベット順） |
-| 8 | アクセシビリティ | `role`, `aria-*` |
-| 9 | データ属性 | `data-*` |
-| 10 | イベント | `on*`（JSX）, `@*`（Vue）, `on:*`（Svelte）; `v-html`, `v-text` |
-
-同一グループ内では静的な値を動的バインディングより前に記述してください。
+| #   | グループ          | 属性        |
+| --- | ----------------- | ----------- |
+| 0   | 制御フロー / 定義 | `key`       |
+| 1   | 一意 ID           | `id`        |
+| 3   | クラス            | `className` |
+| 8   | アクセシビリティ  | `aria-*`    |
+| 9   | データ属性        | `data-*`    |
+| 10  | イベント          | `on*`       |
 
 ## 例
 
-### ✗ 違反（JSX）
+### ✗ 違反
 
 ```tsx
 // イベントが className より前
@@ -43,40 +36,36 @@ HTML/Vue/JSX/Svelte の属性は、定められたグループ順で記述し、
 
 // aria が className より前
 <nav aria-label="main" className="nav" />
+
+// data が className より前
+<section data-testid="hero" className="hero" />
+
+// イベントが id より前
+<button type="button" onClick={handleSubmit} id="submit-btn" />
+
+// key が id より後
+<Item id="x" key={k} />
+
+// 非隣接: 間に属性が挟まっていても className → id の順序違反を検出
+<div className="c" data-x="1" data-y="2" id="i" />
 ```
 
-### ✓ 適正（JSX）
+### ✓ 適正
 
 ```tsx
 <Button className="btn" onClick={handleClick}>Click</Button>
 <div id="main-card" className="card" />
 <nav className="nav" aria-label="main" />
-```
-
-### ✗ 違反（Vue）
-
-```vue
-<!-- イベントが class より前 -->
-<button @click="handleClick" class="btn">Click</button>
-
-<!-- 動的 :class が 静的 class より前 -->
-<div :class="dynamicClass" class="base-class" />
-
-<!-- aria が class より前 -->
-<nav aria-label="main navigation" class="nav" />
-```
-
-### ✓ 適正（Vue）
-
-```vue
-<button class="btn" @click="handleClick">Click</button>
-<div class="base-class" :class="dynamicClass" />
-<nav class="nav" aria-label="main navigation" />
+<section className="hero" data-testid="hero" />
+<button id="submit-btn" type="button" onClick={handleSubmit} />
+<Item key={k} id="x" />
 ```
 
 ## 制限事項
 
-GritQL はパターンマッチング言語のため、検出できるのは **隣接する2属性の順序違反** のみです。3属性以上の組み合わせで最初と3番目が逆順になっているケース（非隣接）は検出されません。完全な属性順序チェックは、Biome ネイティブのルール対応後に拡充予定です。
+チェック対象は上記の JSX 属性（`key`, `id`, `className`, `aria-*`, `data-*`, `on*`）のみです。[PLAN.md](https://github.com/logue/biome-plugins/blob/main/PLAN.md) に記載の 11 グループ全体の順序はより広範囲をカバーしています。
+
+Vue・Svelte・素の HTML テンプレートは **対象外** です。Biome の GritQL プラグインは現時点で JavaScript/TypeScript（JSX 含む）・CSS・JSON の構文木に対してのみパターンをコンパイルできます。`.vue` や `.svelte` ファイルの `<script>` ブロックはこの経路で到達可能です（[`enforce-pure-src`](/rules/enforce-pure-src) 参照）が、テンプレート部分のマークアップには到達できません。テンプレート側の属性順序チェックは、Biome が GritQL のテンプレート言語対応を拡張するまで実装できません。
 
 ## ソース
 

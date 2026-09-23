@@ -29,7 +29,25 @@
         // Sort imports on save.
         // This is useful for keeping import statements organized
         // and consistent.
-        "organizeImports": "on"
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              // Regular imports（semantic grouping from ESLint）
+              [
+                ":NODE:",
+                ":PACKAGE:",
+                ":ALIAS:",
+                ":PATH:"
+              ],
+              ":BLANK_LINE:",
+              // Type-only imports（separate semantic group）
+              {
+                "type": true
+              }
+            ]
+          }
+        }
       }
     }
   },
@@ -79,8 +97,16 @@
         // For libraries, it's common to use default exports for the main entry point.
         // Disable this rule to allow default exports in library code.
         "noDefaultExport": "off",
-        // Add type to import when type only import.
-        "useImportType": "error",
+        // Keep type-only imports as separate `import type { ... }` declarations
+        // instead of inline `type` modifiers, so organizeImports groups and
+        // sorts them apart from value imports (Biome cannot group/sort type vs.
+        // value specifiers within a single combined import statement).
+        "useImportType": {
+          "level": "error",
+          "options": {
+            "style": "separatedType"
+          }
+        },
         // Do not use v-bind:foo="", use :foo="" in Vue.
         "useVueConsistentVBindStyle": "error",
         // Do not use v-on:foo="", use @foo="" in Vue.

@@ -1,118 +1,89 @@
 // [Basis] Attributes should be listed in group order (0–10), and within each group, static attributes should be listed in the order of static → dynamic attributes.
 // For group definitions, see PLAN.md "HTML/Vue/JSX/Svelte Attribute Order Rule".
 //
-// ⚠️ Current limitations:
-// Because GritQL is a pattern matching language, it can only detect "order violations of two adjacent attributes".
-// Cases where another attribute is in between (non-adjacent) will be expanded after Biome's native Attribute Order Rule support is implemented.
-//
-// Target: .jsx / .tsx (JSX), .vue (Vue template)
+// Target: .jsx / .tsx (JSX) only. See "Vue / Svelte / HTML" note below.
 //
 // Reference: https://vuejs.org/style-guide/rules-recommended.html#element-attribute-order
-sequential {
-  // ════════════════════════════════════════════════════════════════
-  // JSX
-  // ════════════════════════════════════════════════════════════════
+//
+// [Implementation notes]
+// 1. A bare metavariable (`id=$id`) cannot bind to a JSX attribute value in this
+//    Biome/GritQL engine — neither a string literal (`id="x"`) nor an expression
+//    container (`id={x}`) matches. Only a fully literal value, or `{$expr}` against an
+//    already-expression-valued attribute, binds successfully. Attribute-order checks
+//    therefore cannot be written as `<$tag a=$a b=$b>` snippets.
+// 2. `contains` combined with an `as`-bound node-type pattern (`JsxOpeningElement()`,
+//    `JsxSelfClosingElement()`) only ever reports the first match in the file — later
+//    matches are silently dropped. Likewise, patterns inside `sequential { }` need an
+//    explicit `bubble` to avoid the same single-match collapse, but `bubble` did not
+//    fix the `contains` case either. Using the node-type pattern directly at the top
+//    level (no `contains`) auto-bubbles per match and reports every element.
+// 3. `$el <: r"..."` requires the regex to match the ENTIRE node text, not a substring
+//    search — patterns must be wrapped in `.*...*.` (see no-null-type.grit for the same
+//    pattern). This also means order checks can compare text position of two attribute
+//    names directly, which incidentally lifts the old "adjacent pairs only" limitation:
+//    a `.*first.*second.*` regex catches out-of-order attributes even when unrelated
+//    attributes sit between them.
+// 4. Multiple independent checks against the same matched element must be combined with
+//    `any { }` (all branches run), not `or { }` (first match wins) or `sequential { }`
+//    (designed for staged rewrites over `file($body)`, not independent scans).
+//
+// [Vue / Svelte / HTML — currently out of scope]
+// GritQL plugins in this Biome version only compile snippets against JavaScript/TypeScript
+// (including JSX), CSS, and JSON syntax trees. A `.vue` SFC's `<script>` block is JS/TS and
+// can be targeted (see enforce-pure-src.grit), but its `<template>` block is not — no
+// `language` directive (html, vue, ...) makes GritQL patterns match template markup, so a
+// Vue/Svelte/HTML version of this rule cannot be implemented today. Revisit once Biome's
+// GritQL plugin support extends to template languages.
 
-  // [JSX] Group 0 (key) → Group 1 (id): key は id より前
-  //
-  // ✗  <Item id="x" key={k} />
-  // ✓  <Item key={k} id="x" />
-  contains `<$tag id=$id key={$k}>` where {
-    register_diagnostic(message="[Attribute Order Rule] The `key` (Group 0) should be written before the `id` (Group 1).", severity="warn")
-  },
-  // [JSX] Group 1 (id) → Group 3 (className): id は className より前
-  //
-  // ✗  <div className="foo" id="bar" />
-  // ✓  <div id="bar" className="foo" />
-  contains `<$tag className=$cls id=$id>` where {
-    register_diagnostic(message="[Attribute Order Rule] The `id` (Group 1) should be written before the `className` (Group 3).", severity="warn")
-  },
-  // [JSX] Group 8 (aria-*) → Group 3 (className): aria は className より後
-  //
-  // ✗  <div aria-$a="..." className="..." />
-  // ✓  <div className="..." aria-$a="..." />
-  contains `<$tag aria-$a=$aria className=$cls>` where {
-    register_diagnostic(message="[Attribute Order Rule] `aria-$a` (Group 8: Accessibility) should be written after `className` (Group 3).", severity="warn")
-  },
-  // [JSX] Group 9 (data-*) → Group 3 (className): data は className より後
-  //
-  // ✗  <div data-$d="..." className="..." />
-  // ✓  <div className="..." data-$d="..." />
-  contains `<$tag data-$d=$data className=$cls>` where {
-    register_diagnostic(message="[Attribute Order Rule] `data-$d` (Group 9: data attribute) should be written after `className` (Group 3).", severity="warn")
-  },
-  // [JSX] Group 10 (on*) → Group 3 (className): イベントは className より後
-  //
-  // ✗  <Button on$Event={fn} className="..." />
-  // ✓  <Button className="..." on$Event={fn} />
-  contains `<$tag on$Event={$fn} className={$cls}>` where {
-    register_diagnostic(message="[Attribute Order Rule] `on$Event` (Group 10: Event) should be written after `className` (Group 3).", severity="warn")
-  },
-  contains `<$tag on$Event={$fn} className="$cls">` where {
-    register_diagnostic(message="[Attribute Order Rule] `on$Event` (Group 10: Event) should be written after `className` (Group 3).", severity="warn")
-  },
-  // [JSX] Group 10 (on*) → Group 1 (id): イベントは id より後
-  //
-  // ✗  <Button on$Event={fn} id="btn" />
-  // ✓  <Button id="btn" on$Event={fn} />
-  contains `<$tag on$Event={$fn} id=$id>` where {
-    register_diagnostic(message="[Attribute Order Rule] `on$Event` (Group 10: Event) should be written after `id` (Group 1).", severity="warn")
-  },
-  // ════════════════════════════════════════════════════════════════
-  // Vue テンプレート
-  // ════════════════════════════════════════════════════════════════
+engine biome(1.0)
+language js(typescript, jsx)
 
-  // [Vue] Group 0 (v-if) → Group 1 (id): v-if は id より前
-  //
-  // ✗  <div id="foo" v-if="cond">
-  // ✓  <div v-if="cond" id="foo">
-  contains `<$tag id="$id" v-if="$cond">` where {
-    register_diagnostic(message="[Attribute Order Rule] `v-if` (Group 0) should be written before `id` (Group 1).", severity="warn")
-  },
-  // [Vue] Group 0 (v-for) → Group 1 (id): v-for は id より前
-  contains `<$tag id="$id" v-for="$iter">` where {
-    register_diagnostic(message="[Attribute Order Rule] `v-for` (Group 0) should be written before `id` (Group 1).", severity="warn")
-  },
-  // [Vue] Group 1 (id) → Group 3 (class): id は class より前
-  //
-  // ✗  <div class="foo" id="bar">
-  // ✓  <div id="bar" class="foo">
-  contains `<$tag class="$cls" id="$id">` where {
-    register_diagnostic(message="[Attribute Order Rule] The `id` (Group 1) should be written before the `class` (Group 3).", severity="warn")
-  },
-  // [Vue] Group 3: 静的 class → 動的 :class（グループ内は静的→動的）
-  //
-  // ✗  <div :class="expr" class="static">
-  // ✓  <div class="static" :class="expr">
-  contains `<$tag :class="$dyn" class="$static">` where {
-    register_diagnostic(message="[Attribute Order Rule] Static `class` should be written before dynamic `:class` (group rule: static → dynamic).", severity="warn")
-  },
-  // [Vue] Group 10 (@event) → Group 3 (class): イベントは class より後
-  //
-  // ✗  <button @$event="fn" class="...">
-  // ✓  <button class="..." @$event="fn">
-  contains `<$tag @$event="$fn" class="$cls">` where {
-    register_diagnostic(message="[Attribute Order Rule] `@$event` (Group 10: Event) should be written after `class` (Group 3).", severity="warn")
-  },
-  // [Vue] Group 10 (@event) → Group 1 (id): イベントは id より後
-  //
-  // ✗  <button @$event="fn" id="btn">
-  // ✓  <button id="btn" @$event="fn">
-  contains `<$tag @$event="$fn" id="$id">` where {
-    register_diagnostic(message="[Attribute Order Rule] `@$event` (Group 10: Event) should be written after `id` (Group 1).", severity="warn")
-  },
-  // [Vue] Group 8 (aria-*) → Group 3 (class): aria は class より後
-  //
-  // ✗  <div aria-$a="..." class="...">
-  // ✓  <div class="..." aria-$a="...">
-  contains `<$tag aria-$a="$aria" class="$cls">` where {
-    register_diagnostic(message="[Attribute Order Rule] `aria-$a` (Group 8: Accessibility) should be written after `class` (Group 3).", severity="warn")
-  },
-  // [Vue] Group 9 (data-*) → Group 3 (class): data は class より後
-  //
-  // ✗  <div data-$d="..." class="...">
-  // ✓  <div class="..." data-$d="...">
-  contains `<$tag data-$d="$data" class="$cls">` where {
-    register_diagnostic(message="[Attribute Order Rule] `data-$d` (Group 9: data attribute) should be written after `class` (Group 3).", severity="warn")
+or {
+  JsxSelfClosingElement(),
+  JsxOpeningElement()
+} as $el where {
+  any {
+    // Group 0 (key) → Group 1 (id)
+    //
+    // ✗  <Item id="x" key={k} />
+    // ✓  <Item key={k} id="x" />
+    $el <: r".*\bid\s*=.*\bkey\s*=.*" where {
+      register_diagnostic(span=$el, message="[Attribute Order Rule] The `key` (Group 0) should be written before the `id` (Group 1).", severity="warn")
+    },
+    // Group 1 (id) → Group 3 (className)
+    //
+    // ✗  <div className="foo" id="bar" />
+    // ✓  <div id="bar" className="foo" />
+    $el <: r".*\bclassName\s*=.*\bid\s*=.*" where {
+      register_diagnostic(span=$el, message="[Attribute Order Rule] The `id` (Group 1) should be written before the `className` (Group 3).", severity="warn")
+    },
+    // Group 3 (className) → Group 8 (aria-*)
+    //
+    // ✗  <div aria-label="..." className="..." />
+    // ✓  <div className="..." aria-label="..." />
+    $el <: r".*\baria-[\w-]+\s*=.*\bclassName\s*=.*" where {
+      register_diagnostic(span=$el, message="[Attribute Order Rule] `aria-*` (Group 8: Accessibility) should be written after `className` (Group 3).", severity="warn")
+    },
+    // Group 3 (className) → Group 9 (data-*)
+    //
+    // ✗  <div data-testid="..." className="..." />
+    // ✓  <div className="..." data-testid="..." />
+    $el <: r".*\bdata-[\w-]+\s*=.*\bclassName\s*=.*" where {
+      register_diagnostic(span=$el, message="[Attribute Order Rule] `data-*` (Group 9: data attribute) should be written after `className` (Group 3).", severity="warn")
+    },
+    // Group 3 (className) → Group 10 (on*)
+    //
+    // ✗  <Button onClick={fn} className="..." />
+    // ✓  <Button className="..." onClick={fn} />
+    $el <: r".*\bon[A-Z]\w*\s*=.*\bclassName\s*=.*" where {
+      register_diagnostic(span=$el, message="[Attribute Order Rule] `on*` (Group 10: Event) should be written after `className` (Group 3).", severity="warn")
+    },
+    // Group 1 (id) → Group 10 (on*)
+    //
+    // ✗  <Button onClick={fn} id="btn" />
+    // ✓  <Button id="btn" onClick={fn} />
+    $el <: r".*\bon[A-Z]\w*\s*=.*\bid\s*=.*" where {
+      register_diagnostic(span=$el, message="[Attribute Order Rule] `on*` (Group 10: Event) should be written after `id` (Group 1).", severity="warn")
+    }
   }
 }

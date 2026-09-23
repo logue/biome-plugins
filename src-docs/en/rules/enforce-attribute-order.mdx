@@ -2,37 +2,30 @@
 
 <cds-tag type="purple">warn</cds-tag>
 
-HTML/Vue/JSX/Svelte attributes must be written in the prescribed group order, and static attributes must come before dynamic ones within the same group.
+JSX attributes must be written in the prescribed group order.
 
 ## What it checks
 
-Adjacent attribute pairs whose group order is inverted. The rule covers `.jsx`, `.tsx`, and `.vue` files.
+Out-of-order attribute pairs — including non-adjacent ones (other attributes may sit between the two being compared). The rule covers `.jsx` and `.tsx` files.
 
 ## Why
 
-A consistent attribute order makes component markup scannable at a glance. The ordering below is derived from the [Vue.js official style guide](https://vuejs.org/style-guide/rules-recommended.html#element-attribute-order).
+A consistent attribute order makes component markup scannable at a glance. The ordering below is derived from the same group model as the [Vue.js official style guide](https://vuejs.org/style-guide/rules-recommended.html#element-attribute-order), applied to the JSX-relevant subset.
 
-## Group order (0 → 10)
+## Group order (checked subset)
 
-| # | Group | Attributes |
-|---|-------|-----------|
-| 0 | Control Flow / Definition | `v-is`, `v-for`, `v-if` / `v-else-if` / `v-else`, `v-show`, `v-cloak`, `v-pre`, `v-once`; JSX: `key`; Svelte: `{#each}` / `{#if}` |
-| 1 | Unique ID | `id`, `name` |
-| 2 | Two-Way Binding / Ref | `v-model`, `v-slot`, `bind:*`, `ref` |
-| 3 | Class | `class` (Vue/HTML), `className` (JSX) — static before dynamic (`:class`) |
-| 4 | Semantic | `alt`, `crossorigin`, `for` / `htmlFor`, `href`, `integrity`, `lang`, `rel`, `src`, `title`, `type` |
-| 5 | Sizing | `height`, `width` |
-| 6 | Style | `style` |
-| 7 | Other | remaining attributes, alphabetical |
-| 8 | Accessibility | `role`, `aria-*` |
-| 9 | Data | `data-*` |
-| 10 | Events | `on*` (JSX), `@*` (Vue), `on:*` (Svelte); `v-html`, `v-text` |
-
-Within a group, write static values before dynamic bindings.
+| #   | Group                     | Attribute   |
+| --- | ------------------------- | ----------- |
+| 0   | Control Flow / Definition | `key`       |
+| 1   | Unique ID                 | `id`        |
+| 3   | Class                     | `className` |
+| 8   | Accessibility             | `aria-*`    |
+| 9   | Data                      | `data-*`    |
+| 10  | Events                    | `on*`       |
 
 ## Examples
 
-### ✗ Incorrect (JSX)
+### ✗ Incorrect
 
 ```tsx
 // Event before className
@@ -43,40 +36,36 @@ Within a group, write static values before dynamic bindings.
 
 // aria before className
 <nav aria-label="main" className="nav" />
+
+// data before className
+<section data-testid="hero" className="hero" />
+
+// event before id
+<button type="button" onClick={handleSubmit} id="submit-btn" />
+
+// key after id
+<Item id="x" key={k} />
+
+// non-adjacent: className still comes before id even with attributes in between
+<div className="c" data-x="1" data-y="2" id="i" />
 ```
 
-### ✓ Correct (JSX)
+### ✓ Correct
 
 ```tsx
 <Button className="btn" onClick={handleClick}>Click</Button>
 <div id="main-card" className="card" />
 <nav className="nav" aria-label="main" />
-```
-
-### ✗ Incorrect (Vue)
-
-```vue
-<!-- Event before class -->
-<button @click="handleClick" class="btn">Click</button>
-
-<!-- Dynamic :class before static class -->
-<div :class="dynamicClass" class="base-class" />
-
-<!-- aria before class -->
-<nav aria-label="main navigation" class="nav" />
-```
-
-### ✓ Correct (Vue)
-
-```vue
-<button class="btn" @click="handleClick">Click</button>
-<div class="base-class" :class="dynamicClass" />
-<nav class="nav" aria-label="main navigation" />
+<section className="hero" data-testid="hero" />
+<button id="submit-btn" type="button" onClick={handleSubmit} />
+<Item key={k} id="x" />
 ```
 
 ## Limitations
 
-GritQL is a pattern-matching language, not an imperative one. This rule can only detect **adjacent** out-of-order attribute pairs. Non-adjacent violations (e.g., three or more attributes where the first and third are swapped) are not detected. Full multi-attribute ordering will require native Biome support in a future release.
+Only the JSX attributes above are checked (`key`, `id`, `className`, `aria-*`, `data-*`, `on*`) — the full 11-group ordering scheme described in [PLAN.md](https://github.com/logue/biome-plugins/blob/main/PLAN.md) is broader.
+
+Vue, Svelte, and plain HTML templates are **not covered**. Biome's GritQL plugin engine currently compiles snippets only against JavaScript/TypeScript (including JSX), CSS, and JSON syntax trees — a `.vue` or `.svelte` file's `<script>` block is reachable this way (see [`enforce-pure-src`](/rules/enforce-pure-src)), but its template markup is not. Template-level attribute ordering will need to wait for Biome to extend GritQL to template languages.
 
 ## Source
 

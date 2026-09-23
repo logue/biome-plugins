@@ -137,76 +137,157 @@ Blank lines between groups are **optional** (low priority).
 
 ---
 
-## HTML / Vue / JSX / Svelte Attribute Order Rule
+## JSX Attribute Order Rule
 
 - Project: `@logue/biome-plugins`
 - Owner: Logue
-- Updated: 2026-08-27
-- Status: `Reviewing`
+- Updated: 2026-09-23
+- Status: `Implemented`
 
 ### 💡 Draft Spec
 
-- Background: No canonical attribute ordering exists across HTML, Vue, JSX, and Svelte. Consistent ordering improves readability and diff quality.
-- Goal: Define a group-based attribute order, inspired by how Tailwind's Prettier plugin enforces class order. Enforce via a lint rule.
-- Scope: `.html`, `.vue`, `.jsx`, `.tsx`, `.svelte` files.
-- Out of scope: Auto-fix / auto-sort (lint warning only for now).
+- Background: JSX/TSX components often mix `key`, `id`, `className`, `aria-*`, `data-*`, and event handlers in inconsistent order. A deterministic order improves readability and reduces diff churn.
+- Goal: Define the canonical attribute order for JSX and enforce it via a GritQL lint rule.
+- Scope: `.jsx`, `.tsx` files.
+- Out of scope: Auto-fix / auto-sort; HTML / Vue / Svelte template attributes.
 
-#### Proposed Attribute Groups
+#### Proposed JSX Attribute Groups
 
-Within each group: **static (string literal) before dynamic (bound / expression)**.
+Within each group: **static attributes first, then dynamic/bound attributes**.
 
-```html
-class="foo" ← static → first :class="bar" ← dynamic → second
-```
-
-Aligned with the [Vue.js official style guide recommended attribute order](https://vuejs.org/style-guide/rules-recommended.html#element-attribute-order).
-
-| #   | Group                         | Attributes                                                                                                                                                                                                       |
-| --- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0   | **Definition / Control Flow** | `is` / `v-is` (Vue); `v-for` (Vue); `v-if`, `v-else-if`, `v-else`, `v-show`, `v-cloak` (Vue); `v-pre`, `v-once` (Vue); `key` (React / JSX); Svelte control-flow block equivalents (`{#if}`, `{#each}`, `{#key}`) |
-| 1   | **ID**                        | `id`, `name`                                                                                                                                                                                                     |
-| 2   | **Two-Way Binding / Ref**     | `v-model`, `v-slot` (Vue); `bind:*` (Svelte — equivalent to `v-model`); `ref` (Vue template ref / JSX ref)                                                                                                       |
-| 3   | **Class**                     | `class` / `className`                                                                                                                                                                                            |
-| 4   | **Semantic**                  | `alt`, `crossorigin`, `for` / `htmlFor`, `href`, `integrity`, `lang`, `rel`, `src`, `title`, `type`                                                                                                              |
-| 5   | **Sizing**                    | `height`, `width`                                                                                                                                                                                                |
-| 6   | **Style**                     | `style` — hardcoded values that cannot be expressed by class/sizing attributes                                                                                                                                   |
-| 7   | **Other**                     | All remaining attributes, alphabetical                                                                                                                                                                           |
-| 8   | **Accessibility**             | `role`, `aria-*`                                                                                                                                                                                                 |
-| 9   | **Data**                      | `data-*`                                                                                                                                                                                                         |
-| 10  | **Events**                    | `onclick` / `onClick` (native/JSX) → `@click` (Vue shorthand, per `useVueConsistentVOnStyle`) → `on:click` (Svelte); `v-html` / `v-text` (Vue content directives)                                                |
+| #   | Group                         | JSX attributes                                                         |
+| --- | ----------------------------- | ---------------------------------------------------------------------- |
+| 0   | **Definition / Control Flow** | `key`                                                                  |
+| 1   | **ID**                        | `id`, `name`                                                           |
+| 2   | **Two-Way Binding / Ref**     | `ref` (JSX ref / template ref equivalent)                              |
+| 3   | **Class**                     | `className`, `class`                                                   |
+| 4   | **Semantic**                  | `alt`, `crossOrigin`, `htmlFor`, `href`, `rel`, `src`, `title`, `type` |
+| 5   | **Sizing**                    | `height`, `width`                                                      |
+| 6   | **Style**                     | `style`                                                                |
+| 7   | **Other**                     | remaining non-special attributes, alphabetical                         |
+| 8   | **Accessibility**             | `role`, `aria-*`                                                       |
+| 9   | **Data**                      | `data-*`                                                               |
+| 10  | **Events**                    | `onClick`, `onChange`, `on*` handlers; native event props last         |
 
 ### ✅ Decision
 
-- Final spec summary: Adopt the 11-group ordering above (Groups 0–10), aligned with the Vue.js official style guide recommended attribute order, with the static-before-dynamic rule within each group.
-- Decision rationale: Mirrors the mental model of "what the element is" → "how it looks" → "how it behaves", consistent with Tailwind's concern-based ordering philosophy. Splitting `v-model` / `ref` into Group 2 after `id` correctly follows Vue's official ordering (Two-Way Binding and Unhandled come after Unique/id in the style guide).
+- Final spec summary: Implement the JSX attribute-order lint in GritQL only. Keep the broader HTML / Vue / Svelte rule as a future item, because Biome's GritQL engine does not target template-language ASTs.
+- Decision rationale: This is the practical limit of the current Biome/GritQL architecture. JSX is covered by the JS/TS AST, so the rule is enforceable and testable here. HTML/Vue/Svelte templates are not reachable from the current plugin engine, so they must be deferred to an engine or toolchain with template AST support.
 
 ### 🛠️ Implementation Tasks
 
-- [x] Define attribute groups and ordering convention (this document).
-- [ ] Add the convention to `AGENTS.md` under a `## HTML Attribute Order` section.
-- [x] Evaluate GritQL feasibility for JSX `style` attributes and Vue template attributes.
-  - Result: GritQL can detect **adjacent** out-of-order attribute pairs via pattern matching.
-    Non-adjacent violations (attributes separated by others) are not currently detectable in GritQL.
-    A native Biome rule would be required for complete coverage.
-- [x] Implement first-pass lint rule: `grit/enforce-attribute-order.grit`
-  - Covers: JSX `on*`/`aria-*`/`data-*`/`key`/`id`/`className` ordering; Vue `@event`/`class`/`id`/`v-if`/`v-for`/`:class` ordering.
-  - Limitation: adjacent pairs only. Severity: `warn`.
+- [x] Define JSX attribute groups and ordering convention (this document).
+- [x] Implement `grit/enforce-attribute-order.grit` for JSX / TSX only.
+- [x] Add regression tests in `grit/__tests__/enforce-attribute-order.spec.ts`.
+- [x] Confirm non-adjacent violations are detected by matching the full JSX element text.
+- [ ] Add the convention to `AGENTS.md` under a `## JSX Attribute Order` section.
+- [ ] Revisit HTML / Vue / Svelte once Biome extends GritQL template-language support.
 
 ### 📚 Finalization Checklist
 
-- [ ] `PLAN.md` reflects latest agreed spec
-- [ ] `AGENTS.md` updated with the ordering table
+- [x] `PLAN.md` reflects latest agreed spec
+- [ ] `AGENTS.md` updated with the JSX ordering table
 - [ ] Open questions are cleared
 
 ### ❓ Open Questions
 
-- [x] ~~Where does `style` (inline) go?~~ → Resolved: Group 6 (between Sizing and Other), as hardcoded fallback for values not expressible via class or sizing attributes.
-- [x] ~~`ref` dual placement~~ → Resolved: `ref` is a Vue template ref / JSX ref, not an HTML attribute. Per the Vue official style guide, it falls in the "Unhandled" category which comes after `id` (Group 1). Placed in Group 2 alongside `v-model` (Two-Way Binding). (`rel` and `ref` were originally confused.)
+- [ ] Should we add a second pass for `className` + `style` ordering inside JSX elements after the base group order is stabilized?
+
+---
+
+## HTML / Vue / Svelte Attribute Order Rule (Deferred)
+
+- Project: `@logue/biome-plugins`
+- Owner: Logue
+- Updated: 2026-09-23
+- Status: `Deferred`
+
+### 💡 Draft Spec
+
+- Background: The same attribute-order idea is valid for HTML, Vue, and Svelte templates, but those files are not directly matchable by the current Biome GritQL engine.
+- Goal: Define the canonical order for template attributes in a future engine that exposes template ASTs.
+- Scope: `.html`, `.vue`, `.svelte` files.
+- Out of scope: Implementation in the current repository; this will require Biome/GritQL support for template-language parsing.
+
+### ✅ Decision
+
+- Final spec summary: Defer the HTML / Vue / Svelte version of the rule. Keep the schema and rationale documented, but do not attempt implementation in the current GritQL plugin layer.
+- Decision rationale: Template AST coverage is unavailable in the current Biome/GritQL version, and attempting to match Vue/Svelte syntax in a JS-only plugin creates parser failures and false negatives. The JSX implementation is the correct scope for this repository right now.
+
+### 🛠️ Implementation Tasks
+
+- [ ] Define final shared attribute-order groups for HTML / Vue / Svelte templates.
+- [ ] Re-evaluate once Biome GritQL supports template-language ASTs.
+- [ ] Move the rule into a template-aware linter if/when available.
+
+### 📚 Finalization Checklist
+
+- [x] Decision recorded in `PLAN.md`
+- [ ] Implementation deferred until template AST support exists
+- [ ] Open questions are cleared
+
+### ❓ Open Questions
+
+- [ ] What is the earliest supported Biome version that provides template-language matching for Vue/Svelte/HTML?
+
+---
+
+## Import Specifier Grouping (type vs. value)
+
+- Project: `@logue/biome-plugins`
+- Owner: Logue
+- Updated: 2026-08-31
+- Status: `Implemented`
+
+### 💡 Draft Spec
+
+- Background: `assist.actions.source.organizeImports` sorts named specifiers within a single
+  `import { ... } from '...'` statement purely alphabetically, ignoring the inline `type`
+  modifier — e.g. `import { apple, type banana, cake, type durian } from '@/food'`. The desire
+  was for value specifiers to come first and type specifiers after, each group sorted.
+- Goal: group type-only specifiers apart from value specifiers, sorted within each group.
+
+### ✅ Decision
+
+- Final spec summary: Biome's `organizeImports` has no option to group specifiers by kind
+  within one combined import statement — confirmed in the official docs: "a type qualifier
+  of a named specifier doesn't affect the order." A GritQL plugin cannot implement this
+  either: this Biome version's GritQL engine doesn't support custom JS functions (`function
+$x js { ... }` fails to compile), has no built-in sort, and cannot even bind a metavariable
+  to a braced specifier list (`import { $specs } from $source` never matches — confirmed
+  against the official docs' own `export { $names }` example, which also doesn't match).
+  Instead, set `linter.rules.style.useImportType.options.style` to `"separatedType"`, which
+  forces type-only specifiers into their own `import type { ... }` declaration whenever an
+  import mixes types and values. Combined with `organizeImports` (which already places the
+  `import type` statement ahead of the value import for the same source by default), this
+  achieves the same grouped-and-sorted intent as two lines instead of one:
+
+  ```ts
+  import type { banana, durian } from "@/food";
+  import { apple, cake } from "@/food";
+  ```
+
+- Decision rationale: Fully native, zero-maintenance, and verified end-to-end with
+  `biome check --write`. The one-statement form the user originally pictured is not
+  implementable given the current Biome GritQL engine's constraints (see above).
+
+### 🛠️ Implementation Tasks
+
+- [x] Set `useImportType` to `{ "level": "error", "options": { "style": "separatedType" } }`
+      in `biome.jsonc`.
+- [x] Verified against a mixed `import { apple, type banana, cake, type durian } from '../food'`
+      fixture: `biome check --write` splits and sorts it into the two-line form above.
 
 ---
 
 ## 🕒 Changelog
 
+- 2026-08-31: Set `useImportType` to `style: "separatedType"` (see "Import Specifier Grouping"
+  above) so type-only imports are split into their own `import type { ... }` declaration and
+  sorted apart from value imports — Biome's `organizeImports` cannot group specifiers by kind
+  within a single combined import statement, and a GritQL plugin can't either (no custom JS
+  functions, no sort, can't bind a metavariable to a braced specifier list in this engine).
+- 2026-08-31: Fixed `grit/enforce-attribute-order.grit`, which never actually flagged anything: the Vue-section patterns used `@event`/`:class` syntax GritQL's snippet parser cannot parse at all, which failed the _entire_ plugin's compilation (so even the JSX rules never ran); separately, the JSX patterns used bare metavariables in attribute-value position (`id=$id`), which this Biome/GritQL engine cannot bind, and used `contains` with an `as`-bound node pattern, which only ever reports the first match in a file. Rewrote the rule to match `JsxOpeningElement()`/`JsxSelfClosingElement()` directly and check attribute order via full-text regex, combined with `any { }` so every check runs per element. Removed the non-functional Vue section — GritQL plugins in this Biome version only target JS/TS(JSX)/CSS/JSON, so Vue/Svelte template attribute order cannot be implemented until Biome extends GritQL to template languages (tracked in the rule's task list above). Added `grit/__tests__/enforce-attribute-order.spec.ts` (previously untested) and removed the unused/never-wired-up `.vue` fixture files.
 - 2026-08-28: Implemented `grit/enforce-attribute-order.grit` (adjacent-pair detection for JSX and Vue); created `grit/vue-multi-word-filename.grit`; fixed `grit/enforce-pure-src.grit` syntax (`$file_path.matches()` → `$filename <: r"..."`)
 - 2026-08-27: Attribute order: restructured to 11 groups (0–10) aligned with Vue official style guide; `ref` moved from Group 0 to Group 2 (Two-Way Binding / Ref) after `id`; `v-model`/`v-slot` separated from control-flow directives into Group 2; `v-html`/`v-text` added to Group 10; Svelte control-flow block equivalents noted in Group 0
 - 2026-08-21: Attribute order: added `style` as Group 5, added `crossorigin`/`integrity`/`lang`/`ref`/`rel` to Group 3 Semantic, renumbered groups 5–9

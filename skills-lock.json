@@ -1,29 +1,35 @@
 {
   "version": 1,
   "skills": {
+    "gritql": {
+      "source": "peterfox/agent-skills",
+      "sourceType": "github",
+      "skillPath": "gritql/SKILL.md",
+      "computedHash": "38dd43592304452812ee3e738d3b54c2d98c7696d360e9174b7aab632834693a"
+    },
     "rspress-best-practices": {
       "source": "rstackjs/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/rspress-best-practices/SKILL.md",
-      "computedHash": "4e7ae99820cbe318bbaee92aa8b5ba115c41ea6727d4d109e1133e45a2b43368"
+      "computedHash": "6aa7f74c6f1d0ae1f000d412c068a17023269192a056c84f8ffcae561c2e2a12"
     },
     "rspress-custom-theme": {
       "source": "rstackjs/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/rspress-custom-theme/SKILL.md",
-      "computedHash": "1c756906de80e2e2ec24c5442482bf79bb08749b17ba0b0e44b4e00c6854b203"
+      "computedHash": "9efebf0ef0da8d388d182fabd8e2b0ef05b385f5ee53de71912e7ebc7fbacda0"
     },
     "rspress-description-generator": {
       "source": "rstackjs/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/rspress-description-generator/SKILL.md",
-      "computedHash": "ca2693ca055d1b4e5903bdfacab522f46ca0e13cbc5db59e6c9589fdc8efc6ad"
+      "computedHash": "9110d9e13d1e9ebb4a6a09fcbf07c97afa5af92bcc58440bb13b54728a3c8192"
     },
     "rspress-docs-generator": {
       "source": "rstackjs/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/rspress-docs-generator/SKILL.md",
-      "computedHash": "29ab486fd64614aa2a5380d4eb2aecaa21a2f6d5c012d77e4dfffde42ecaa08f"
+      "computedHash": "ac15a47048425a68fc671cf3754eef2b857e41db08354d09deb98f3bed1d6a1d"
     }
   }
 }
