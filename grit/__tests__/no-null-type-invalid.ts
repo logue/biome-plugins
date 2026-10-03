@@ -17,4 +17,4 @@ const handleUser = (user: User | null) => {
 };
 
 // ✗ 変数型アノテーション: T | null
-const selectedItem: Item | null = null;
+const selectedItem: Item | null = undefined;
