@@ -23,7 +23,7 @@
   "bugs": {
     "url": "https://github.com/logue/biome-plugins/issues"
   },
-  "packageManager": "pnpm@12.8.1",
+  "packageManager": "pnpm@12.9.1",
   "files": [
     "grit/",
     "!grit/__tests__",

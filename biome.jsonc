@@ -5,11 +5,28 @@
   "files": {
     "includes": [
       "**",
-      "!!**/.rsbuild",
-      "!!**/.rslib",
-      "!!**/node_modules",
-      "!!**/dist",
-      "!!**/docs"
+      // AI agents skill docs.
+      "!!**/.agents ",
+      // Build intermediate artifacts.
+      "!!**/.cache ",
+      "!!**/.data ",
+      "!!**/.mf ",
+      "!!**/.nitro ",
+      "!!**/.nuxt ",
+      "!!**/.output ",
+      "!!**/.rstack ",
+      // Test coverage reports.
+      "!!**/coverage ",
+      "!!**/reports",
+      "!!**/test-results",
+      // Build artifacts.
+      "!!**/demo ",
+      "!!**/dist-ssr ",
+      "!!**/dist ",
+      "!!**/docs ",
+      "!!**/storybook-static ",
+      // Node modules.
+      "!!**/node_modules"
     ],
     // Ignore files that cannot be processed by biome.
     "ignoreUnknown": true

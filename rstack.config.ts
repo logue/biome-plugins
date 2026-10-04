@@ -50,7 +50,7 @@ const _bannerText = `/**
 */
 `;
 
-const createBuildDefines = () => ({
+const _createBuildDefines = () => ({
   'import.meta.env.APP_VERSION': JSON.stringify(pkg.version),
   'import.meta.env.BUILD_DATE': JSON.stringify(buildDate),
 });
