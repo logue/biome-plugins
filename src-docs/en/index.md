@@ -2,7 +2,7 @@
 pageType: home
 
 hero:
-  name: "@logue/biome-plugins"
+  name: '@logue/biome-plugins'
   text: Custom Biome Lint Rules
   tagline: >
     GritQL-based rules that enforce consistent TypeScript conventions

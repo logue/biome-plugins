@@ -2,7 +2,7 @@
 pageType: home
 
 hero:
-  name: "@logue/biome-plugins"
+  name: '@logue/biome-plugins'
   text: カスタムBiome Lintルール
   tagline: >
     GritQLベースのルールで、Rstackプロジェクト全体で一貫したTypeScriptの規約を強制します。

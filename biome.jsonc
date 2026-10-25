@@ -8,23 +8,24 @@
       // AI agents skill docs.
       "!!**/.agents ",
       // Build intermediate artifacts.
-      "!!**/.cache ",
-      "!!**/.data ",
-      "!!**/.mf ",
-      "!!**/.nitro ",
-      "!!**/.nuxt ",
-      "!!**/.output ",
-      "!!**/.rstack ",
+      "!!**/.cache",
+      "!!**/.data",
+      "!!**/.mf",
+      "!!**/.nitro",
+      "!!**/.nuxt",
+      "!!**/.output",
+      "!!**/.rstack",
       // Test coverage reports.
-      "!!**/coverage ",
+      "!!**/coverage",
       "!!**/reports",
       "!!**/test-results",
       // Build artifacts.
-      "!!**/demo ",
+      "!!**/demo",
       "!!**/grit",
-      "!!**/dist ",
-      "!!**/docs ",
-      "!!**/storybook-static ",
+      "!!**/dist",
+      "!!**/docs",
+      "!!**/storybook-static",
+      "!!**/src-docs",
       // Node modules.
       "!!**/node_modules",
       "!biome-manifest.jsonc"
