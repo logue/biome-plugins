@@ -1,3 +1,5 @@
+/* rslint-disable */
+// @ts-nocheck: error check code
 // no-null-type — VALID cases
 // Expected: 0 diagnostics
 
@@ -21,5 +23,5 @@ const selectedItem: Item | undefined = undefined;
 
 // ✓ JSON 変換境界（例外ケース）
 const normalized = {
-  value: apiResponse.value ?? undefined,
+  value: apiResponse.value ?? undefined
 };

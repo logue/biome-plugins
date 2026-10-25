@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@rstest/core';
+import { describe, expect, it } from 'rstack/test';
 
 import { checkWithRule } from './helpers/run-biome';
 
@@ -9,7 +9,7 @@ describe('grit/prefer-union-over-enum', () => {
   it('flags a plain enum', () => {
     const result = checkWithRule(
       RULE,
-      "export enum Color {\n  Red = 'red',\n  Green = 'green',\n}\n",
+      "export enum Color {\n  Red = 'red',\n  Green = 'green',\n}\n"
     );
 
     expect(result.ok).toBe(false);
@@ -19,7 +19,7 @@ describe('grit/prefer-union-over-enum', () => {
   it('flags a const enum', () => {
     const result = checkWithRule(
       RULE,
-      'export const enum Direction {\n  Up,\n  Down,\n}\n',
+      'export const enum Direction {\n  Up,\n  Down,\n}\n'
     );
 
     expect(result.ok).toBe(false);
@@ -29,7 +29,7 @@ describe('grit/prefer-union-over-enum', () => {
   it('does not flag an equivalent union type', () => {
     const result = checkWithRule(
       RULE,
-      "export type Color = 'red' | 'green';\n",
+      "export type Color = 'red' | 'green';\n"
     );
 
     expect(result.ok).toBe(true);

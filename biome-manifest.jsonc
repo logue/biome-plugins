@@ -1,12 +1,21 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.11/schema.json",
   "name": "@logue/biome-plugins",
-  "version": "0.0.4",
+  "version": 1,
   "rules": [
-    "grit/enforce-attribute-order.grit",
-    "grit/enforce-pure-src.grit",
-    "grit/prefer-union-over-enum.grit",
-    "grit/no-null-type.grit",
-    "grit/vue-multi-word-filename.grit"
+    {
+      "EnforceAttributeOrder": "grit/enforce-attribute-order.grit"
+    },
+    {
+      "EnforcePureSrc": "grit/enforce-pure-src.grit"
+    },
+    {
+      "PreferUnionOverEnum": "grit/prefer-union-over-enum.grit"
+    },
+    {
+      "NoNullType": "grit/no-null-type.grit"
+    },
+    {
+      "VueMultiWordFilename": "grit/vue-multi-word-filename.grit"
+    }
   ]
 }

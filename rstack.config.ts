@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 
 import markdownPlugin from '@eslint/markdown';
 import prettierPlugin from 'eslint-config-prettier';
-
+import { configs as yamlConfigs } from 'eslint-plugin-yml';
 
 /**
  * The UMD name is used for the global variable name when the library
@@ -52,45 +52,44 @@ const _bannerText = `/**
 
 const _createBuildDefines = () => ({
   'import.meta.env.APP_VERSION': JSON.stringify(pkg.version),
-  'import.meta.env.BUILD_DATE': JSON.stringify(buildDate),
+  'import.meta.env.BUILD_DATE': JSON.stringify(buildDate)
 });
 
 const IGNORE_PATTERNS = [
   // AI agents skill docs.
+  '**/.agent/**',
   '**/.agents/**',
+  '**/.claude/**',
+  '**/.cursor/**',
+  '**/.windsurf/**',
   // Build intermediate artifacts.
   '**/.cache/**',
   '**/.data/**',
   '**/.mf/**',
   '**/.nitro/**',
   '**/.nuxt/**',
-  '**/.output/**',
+  '**/.pnpm/**',
   '**/.rstack/**',
   // Test coverage reports.
   '**/coverage/**',
-  '**/reports',
-  '**/test-results',
+  '**/e2e/**',
+  '**/playwright-report/**',
+  '**/reports/**',
+  '**/test-results/**',
   // Build artifacts.
   '**/demo/**',
-  '**/dist-ssr/**',
   '**/dist/**',
   '**/docs/**',
   '**/storybook-static/**',
-  // Grit (Biome Rules) source artifacts.
-  '**/grit/**',
-  // Node modules.
-  '**/node_modules/**',
+  '**/target/**',
+  // Node modules
+  '**/node_modules/**'
 ];
 
-const APP_FILES = [
-  '**/*.{ts,mts,tsx,js,mjs,jsx,json,jsonc,yml,yaml,mdx,vue,astro,svelte}',
-];
-const TEST_FILES = [
-  '**/*.{test,spec}.{ts,mts,tsx,js,mjs,jsx}',
-];
-const DOC_FILES = [
-  '**/*.{md,mdx}',
-];
+const APP_FILES = ['**/*.{ts,mts,tsx,js,mjs,jsx,json,jsonc,vue,astro,svelte}'];
+const TEST_FILES = ['**/*.{test,spec}.{ts,mts,tsx,js,mjs,jsx}'];
+const DOC_FILES = ['**/*.{md,mdx}'];
+const YAML_FILES = ['**/*.{yml,yaml}'];
 
 /**
  * Rslib Config
@@ -196,152 +195,128 @@ define.app({
  * @see {@link https://rstack.rs/guide/cli/doc | Doc Config}
  * @see {@link https://rspress.rs/api/ | Rspress Config}
  */
-define.doc(
-  {
-    // Directory settings
-    root: 'src-docs',
-    outDir: 'docs',
-    base: `/${pkg.name}/`,
-
-    builderConfig: {
-      plugins: [
-        pluginSass(),
-      ],
-    },
-    // Site config
-    title: pkg.name,
-    description: pkg.description,
-    icon: '/favicon.svg',
-    lang: 'en',
-    logo: {
-      light: '/rspress-light-logo.png',
-      dark: '/rspress-dark-logo.png',
-    },
-    head: [
-      [
-        'meta',
-        {
-          name: 'author',
-          content: pkg.author.name,
-        },
-      ],
-      [
-        'meta',
-        {
-          name: 'reply-to',
-          content: pkg.author.email,
-        },
-      ],
-    ],
-    locales: [
-      {
-        lang: 'en',
-        label: 'English',
-        title: 'Manual',
-        description:
-          'Custom Biome lint rules (GritQL plugins) for Rstack-based TypeScript projects.',
-      },
-      {
-        lang: 'ja',
-        label: '日本語',
-        title: 'マニュアル',
-        description: 'カスタムの規約',
-      },
-    ],
-    themeConfig: {
-      socialLinks: [
-        {
-          icon: 'github',
-          mode: 'link',
-          content: pkg.homepage,
-        },
-      ],
-      nav: [
-        {
-          text: 'Guide',
-          link: '/guide/getting-started',
-          activeMatch: '/guide/',
-        },
-        {
-          text: 'Rules',
-          link: '/rules/',
-          activeMatch: '/rules/',
-        },
-      ],
-      sidebar: {
-        '/guide/': [
-          {
-            text: 'Guide',
-            items: [
-              {
-                text: 'Getting Started',
-                link: '/guide/getting-started',
-              },
-              {
-                text: 'Contributing',
-                link: '/guide/contributing',
-              },
-            ],
-          },
-        ],
-        '/rules/': [
-          {
-            text: 'Rules',
-            items: [
-              {
-                text: 'Overview',
-                link: '/rules/',
-              },
-              {
-                text: 'GritQL Rules',
-                items: [
-                  {
-                    text: 'enforce-pure-src',
-                    link: '/rules/enforce-pure-src',
-                  },
-                  {
-                    text: 'prefer-union-over-enum',
-                    link: '/rules/prefer-union-over-enum',
-                  },
-                  {
-                    text: 'no-null-type',
-                    link: '/rules/no-null-type',
-                  },
-                  {
-                    text: 'vue-multi-word-filename',
-                    link: '/rules/vue-multi-word-filename',
-                  },
-                  {
-                    text: 'enforce-attribute-order',
-                    link: '/rules/enforce-attribute-order',
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    },
-  },
-  /*
-  {
-
+define.doc({
+  // Directory settings
+  root: 'src-docs',
+  outDir: 'docs',
+  // If the package name and repository name are different, correct them as needed.
+  base: `/${pkg.name.slice(pkg.name.lastIndexOf('/') + 1)}/`,
   // Site information settings
   title: pkg.name,
   description: pkg.description,
+  head: [
+    [
+      'meta',
+      {
+        name: 'author',
+        content: pkg.author.name
+      }
+    ],
+    [
+      'meta',
+      {
+        name: 'reply-to',
+        content: pkg.author.email
+      }
+    ]
+  ],
   lang: 'en',
+  builderConfig: {
+    plugins: [pluginSass()]
+  },
+
   locales: [
     {
       lang: 'en',
       label: 'English',
-      title: 'My Site',
-      description: 'My site description'
+      title: 'Manual',
+      description:
+        'Custom Biome lint rules (GritQL plugins) for Rstack-based TypeScript projects.'
+    },
+    {
+      lang: 'ja',
+      label: '日本語',
+      title: 'マニュアル',
+      description: 'カスタムの規約'
     }
   ],
+  themeConfig: {
+    socialLinks: [
+      {
+        icon: 'github',
+        mode: 'link',
+        content: pkg.homepage
+      }
+    ],
+    nav: [
+      {
+        text: 'Guide',
+        link: '/guide/getting-started',
+        activeMatch: '/guide/'
+      },
+      {
+        text: 'Rules',
+        link: '/rules/',
+        activeMatch: '/rules/'
+      }
+    ],
+    sidebar: {
+      '/guide/': [
+        {
+          text: 'Guide',
+          items: [
+            {
+              text: 'Getting Started',
+              link: '/guide/getting-started'
+            },
+            {
+              text: 'Contributing',
+              link: '/guide/contributing'
+            }
+          ]
+        }
+      ],
+      '/rules/': [
+        {
+          text: 'Rules',
+          items: [
+            {
+              text: 'Overview',
+              link: '/rules/'
+            },
+            {
+              text: 'GritQL Rules',
+              items: [
+                {
+                  text: 'enforce-pure-src',
+                  link: '/rules/enforce-pure-src'
+                },
+                {
+                  text: 'prefer-union-over-enum',
+                  link: '/rules/prefer-union-over-enum'
+                },
+                {
+                  text: 'no-null-type',
+                  link: '/rules/no-null-type'
+                },
+                {
+                  text: 'vue-multi-word-filename',
+                  link: '/rules/vue-multi-word-filename'
+                },
+                {
+                  text: 'enforce-attribute-order',
+                  link: '/rules/enforce-attribute-order'
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
   // generate llms.txt
   llms: true
-  }*/
-);
+});
 
 /**
  * Rstest Config
@@ -349,8 +324,8 @@ define.doc(
  */
 define.test({
   source: {
-    tsconfigPath: './tsconfig.rstest.json',
-  },
+    tsconfigPath: './tsconfig.rstest.json'
+  }
 });
 
 /**
@@ -371,27 +346,32 @@ define.lint(
     // jestPlugin,
     rstestPlugin,
     unicornPlugin,
-    jsxA11yPlugin,
+    jsxA11yPlugin
   }) => [
     {
       ignores: IGNORE_PATTERNS,
       languageOptions: {
         lobals: {
           ...globals.browser,
-          ...globals.nodeBuiltin,
+          ...globals.nodeBuiltin
         },
         parserOptions: {
           project: [
-            './tsconfig.json',
-          ],
-        },
-      },
+            './tsconfig.node.json',
+            // './tsconfig.rsbuild.json',
+            './tsconfig.rslib.json',
+            './tsconfig.rspress.json',
+            './tsconfig.rstest.json'
+          ]
+        }
+      }
     },
 
     // Base TypeScript recommended sets.
     js.configs.recommended,
     ts.configs.strictTypeChecked,
     ts.configs.stylisticTypeChecked,
+    importPlugin.configs.recommended,
     promisePlugin.configs.recommended,
     unicornPlugin.configs.recommended,
     // nodePlugin.configs.recommended,
@@ -400,28 +380,21 @@ define.lint(
     jsxA11yPlugin.configs.recommended,
 
     {
-      ...importPlugin.configs.recommended,
       files: APP_FILES,
-      plugins: [
-        '@typescript-eslint',
-        'import',
-        'promise',
-        'unicorn',
-      ],
+      plugins: ['@typescript-eslint', 'import', 'promise', 'unicorn'],
       rules: {
-        ...importPlugin.configs.recommended.rules,
         '@typescript-eslint/array-type': [
           'error',
           {
-            default: 'array',
-          },
+            default: 'array'
+          }
         ],
 
         // Keep project lint behavior aligned with the previous baseline.
         '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/consistent-generic-constructors': [
           'error',
-          'type-annotation',
+          'type-annotation'
         ],
         '@typescript-eslint/explicit-function-return-type': 'off',
 
@@ -435,8 +408,8 @@ define.lint(
             caughtErrorsIgnorePattern: '^_',
             destructuredArrayIgnorePattern: '^_',
             ignoreRestSiblings: true,
-            varsIgnorePattern: '^_',
-          },
+            varsIgnorePattern: '^_'
+          }
         ],
         '@typescript-eslint/triple-slash-reference': 'off',
         // Use them according to the context (see AGENTS.md).
@@ -446,16 +419,14 @@ define.lint(
         'import/no-relative-parent-imports': [
           'error',
           {
-            ignore: [
-              '^@/',
-            ],
-          },
+            ignore: ['^@/']
+          }
         ],
         'import/order': [
           'error',
           {
             alphabetize: {
-              order: 'asc',
+              order: 'asc'
             },
             groups: [
               'builtin',
@@ -464,7 +435,7 @@ define.lint(
               'sibling',
               'index',
               'object',
-              'type',
+              'type'
             ],
             'newlines-between': 'always',
             pathGroups: [
@@ -472,47 +443,33 @@ define.lint(
                 group: 'builtin',
                 pattern:
                   '{@rsbuild/**,@rsdoctor/**,@rslint/**,@rslib/*,@rspack/**,@rstest/**,rstack,rstack/**}',
-                position: 'before',
+                position: 'before'
               },
               {
                 group: 'internal',
                 pattern: '{@/**}',
-                position: 'before',
-              },
+                position: 'before'
+              }
             ],
-            pathGroupsExcludedImportTypes: [
-              'builtin',
-            ],
-          },
+            pathGroupsExcludedImportTypes: ['builtin']
+          }
         ],
         // File names should, in principle, be in PascalCase, with some exceptions.
-        'unicorn/filename-case': 'off',
+        'unicorn/filename-case': 'off'
       },
       settings: {
         'import/resolver': {
-          'eslint-import-resolver-custom-alias': {
-            alias: {
-              '@': './src',
-              '~': './node_modules',
-            },
-            extensions: [
-              '.js',
-              '.ts',
-              '.json',
-              '.jsonc',
-              '.yml',
-              '.yaml',
-              '.jsx',
-              '.tsx',
-              '.vue',
-              '.svelte',
-              '.astro',
-            ],
-          },
-          node: true,
-          typescript: true,
-        },
-      },
+          typescript: {
+            project: [
+              './tsconfig.node.json',
+              './tsconfig.rsbuild.json',
+              './tsconfig.rspress.json',
+              './tsconfig.rslib.json',
+              './tsconfig.rstest.json'
+            ]
+          }
+        }
+      }
     },
 
     {
@@ -522,19 +479,23 @@ define.lint(
       rules: {
         // The demo data for the test code should preferably be of type `any`.
         '@typescript-eslint/no-explicit-any': 'warn',
-        'import/no-relative-parent-imports': 'off',
-      },
+        'import/no-relative-parent-imports': 'off'
+      }
     },
 
-    {
-      files: DOC_FILES,
-      plugins: [
-        'markdown',
-      ],
-      ...markdownPlugin.configs.recommended,
-    },
-    prettierPlugin.rules,
-  ],
+    ...markdownPlugin.configs.recommended.map(config => ({
+      ...config,
+      language: 'markdown/gfm',
+      files: DOC_FILES
+    })),
+
+    ...yamlConfigs['flat/prettier'].map(config => ({
+      ...config,
+      files: YAML_FILES,
+      plugins: ['yml']
+    })),
+    prettierPlugin.rules
+  ]
 );
 
 /**
@@ -555,7 +516,7 @@ define.fmt({
   // Bellow is rstack options
   // see https://rstack.rs/guide/formatting
   ignorePatterns: IGNORE_PATTERNS,
-  sortPackageJson: true,
+  sortPackageJson: true
 });
 
 /**
@@ -563,9 +524,6 @@ define.fmt({
  * @see {@link https://rstack.rs/guide/cli/hooks | Git Hooks}
  */
 define.staged({
-  '*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}': [
-    'rs lint --fix',
-    'rs fmt',
-  ],
-  '*.{json,md,mdx,css,scss,less,html,yml,yaml}': 'rs fmt',
+  '*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}': ['rs lint --fix', 'rs fmt'],
+  '*.{json,md,mdx,css,scss,less,html,yml,yaml}': 'rs fmt'
 });

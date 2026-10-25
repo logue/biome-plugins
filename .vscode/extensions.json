@@ -1,6 +1,9 @@
 {
   "recommendations": [
+    "rstack.rstack",
+    "esbenp.prettier-vscode",
     "grit.grit-vscode",
     "biomejs.biome"
-  ]
+  ],
+  "unwantedRecommendations": ["rstack.rslint", "rstack.rstest"]
 }

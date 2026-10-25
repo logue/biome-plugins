@@ -1,0 +1,25 @@
+{
+  "extends": "@tsconfig/node-lts/tsconfig.json",
+  "include": ["env.d.ts", "grit/**/*"],
+  "exclude": ["**/node_modules", "**/.*/", "grit/**/__tests__/*"],
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "isolatedModules": true,
+    /* modules */
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    /* type checking */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "dist",
+    "paths": {
+      "@/*": ["./grit/*"]
+    },
+    "resolveJsonModule": true,
+    "rootDir": "src",
+    "tsBuildInfoFile": "./.rstack/tsconfig.rslib.tsbuildinfo",
+    "useDefineForClassFields": true,
+    "types": ["rstack/types", "node"]
+  }
+}

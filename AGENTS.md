@@ -51,7 +51,9 @@ function handler(data: { value?: string }) {}
 ```ts
 // Immediately after JSON.parse: normalize null → undefined
 const apiData = JSON.parse(json);
-const normalized = { value: apiData.value ?? undefined };
+const normalized = {
+  value: apiData.value ?? undefined
+};
 
 // Downstream code uses undefined only
 process(normalized.value);
@@ -87,12 +89,12 @@ Pair the type with its default values in a `.ts` sibling:
 
 ```ts
 // types/Options.ts
-import type { Options } from "./Options.d.ts";
+import type { Options } from './Options.d.ts';
 
 /** Default configuration */
 export const Options: Options = {
-  someText: "white",
-  someNumber: 1,
+  someText: 'white',
+  someNumber: 1
 };
 ```
 

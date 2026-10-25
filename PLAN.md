@@ -263,8 +263,8 @@ $x js { ... }` fails to compile), has no built-in sort, and cannot even bind a m
   achieves the same grouped-and-sorted intent as two lines instead of one:
 
   ```ts
-  import type { banana, durian } from "@/food";
-  import { apple, cake } from "@/food";
+  import type { banana, durian } from '@/food';
+  import { apple, cake } from '@/food';
   ```
 
 - Decision rationale: Fully native, zero-maintenance, and verified end-to-end with

@@ -1,17 +1,38 @@
+# AI Agent local directories (DO NOT COMMIT)
+.agent/
+.agents/
+.claude/
+.cursor/
+.windsurf/
+
 # Dependencies
 node_modules/
-.claude/
 
 # Build / Cache
+.cache/
+.cargo/config.toml
+.data/
+.mf/
+.nitro/
+.nuxt/
+.output/
+.pnpm/crates/
+.rstack/
+!.rstack/hooks/
+
+# Test Report
+coverage/
+e2e/
+playwright-report/
+reports/
+test-results/
+
+# Production / Build output
+target/
 dist/
 docs/
 demo/
-.rsbuild/
-.rslib/
-coverage/
-
-# Database
-data/
+storybook-static/
 
 # Environment
 .env
@@ -20,17 +41,20 @@ data/
 
 # Lockfiles
 *.lock
+!Cargo.lock
 # pnpm-lock.yaml # as you need to commit this file for reproducible builds
 # pnpm-workspace.yaml # as you need to commit this file for reproducible builds
 
 # IDE
-.vscode/*
+.vscode/
 !.vscode/extensions.json
+!.vscode/mcp.json
 !.vscode/settings.json
-.idea/
 
 # Local
+/local
 .DS_Store
-Thumbs.db
 *.local
 *.log*
+*.seed
+Thumbs.db

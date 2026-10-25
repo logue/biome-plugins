@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@rstest/core';
+import { describe, expect, it } from 'rstack/test';
 
 import { checkWithRule } from './helpers/run-biome';
 
@@ -10,7 +10,7 @@ describe('grit/enforce-attribute-order', () => {
     const result = checkWithRule(
       RULE,
       'const el = <Item id="x" key={k} />;\n',
-      FILE_PATH,
+      FILE_PATH
     );
 
     expect(result.ok).toBe(false);
@@ -21,7 +21,7 @@ describe('grit/enforce-attribute-order', () => {
     const result = checkWithRule(
       RULE,
       'const el = <div className="foo" id="bar" />;\n',
-      FILE_PATH,
+      FILE_PATH
     );
 
     expect(result.ok).toBe(false);
@@ -32,7 +32,7 @@ describe('grit/enforce-attribute-order', () => {
     const result = checkWithRule(
       RULE,
       'const el = <nav aria-label="main" className="nav" />;\n',
-      FILE_PATH,
+      FILE_PATH
     );
 
     expect(result.ok).toBe(false);
@@ -43,7 +43,7 @@ describe('grit/enforce-attribute-order', () => {
     const result = checkWithRule(
       RULE,
       'const el = <section data-testid="hero" className="hero" />;\n',
-      FILE_PATH,
+      FILE_PATH
     );
 
     expect(result.ok).toBe(false);
@@ -54,7 +54,7 @@ describe('grit/enforce-attribute-order', () => {
     const result = checkWithRule(
       RULE,
       'const el = <Button onClick={fn} className="btn" />;\n',
-      FILE_PATH,
+      FILE_PATH
     );
 
     expect(result.ok).toBe(false);
@@ -65,7 +65,7 @@ describe('grit/enforce-attribute-order', () => {
     const result = checkWithRule(
       RULE,
       'const el = <button type="button" onClick={handleSubmit} id="submit-btn" />;\n',
-      FILE_PATH,
+      FILE_PATH
     );
 
     expect(result.ok).toBe(false);
@@ -76,7 +76,7 @@ describe('grit/enforce-attribute-order', () => {
     const result = checkWithRule(
       RULE,
       'const el = <div className="c" data-x="1" data-y="2" id="i" />;\n',
-      FILE_PATH,
+      FILE_PATH
     );
 
     expect(result.ok).toBe(false);
@@ -93,9 +93,9 @@ describe('grit/enforce-attribute-order', () => {
         'const d = <section className="hero" data-testid="hero" />;',
         'const e = <Button className="btn" onClick={fn} />;',
         'const f = <button id="submit-btn" type="button" onClick={handleSubmit} />;',
-        '',
+        ''
       ].join('\n'),
-      FILE_PATH,
+      FILE_PATH
     );
 
     expect(result.ok).toBe(true);

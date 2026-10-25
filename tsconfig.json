@@ -10,6 +10,10 @@
     {
       "path": "./tsconfig.rspress.json"
     },
+    // For build library use
+    {
+      "path": "./tsconfig.rslib.json"
+    },
     // For test use
     {
       "path": "./tsconfig.rstest.json"

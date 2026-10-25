@@ -1,25 +1,17 @@
 /* rslint-disable @typescript-eslint/no-explicit-any */
-import type { HTMLAttributes } from 'react';
-
+declare module '*.css';
 declare module '*.scss';
+
 interface ImportMetaEnv {
   /** package.json version value. */
   readonly APP_VERSION: string;
   /** Last build date */
   readonly BUILD_DATE: string;
+  /** Static Site Generation to Markdown */
+  readonly SSG_MD: boolean;
 }
-
 interface ImportMeta {
   readonly env: ImportMetaEnv;
-}
-
-type CarbonWebComponentProps = HTMLAttributes<HTMLElement> &
-  Record<string, unknown>;
-
-declare module 'react' {
-  namespace JSX {
-    type IntrinsicElements = Record<`cds-${string}`, CarbonWebComponentProps>;
-  }
 }
 
 /*

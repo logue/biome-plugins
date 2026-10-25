@@ -21,12 +21,13 @@
       "!!**/test-results",
       // Build artifacts.
       "!!**/demo ",
-      "!!**/dist-ssr ",
+      "!!**/grit",
       "!!**/dist ",
       "!!**/docs ",
       "!!**/storybook-static ",
       // Node modules.
-      "!!**/node_modules"
+      "!!**/node_modules",
+      "!biome-manifest.jsonc"
     ],
     // Ignore files that cannot be processed by biome.
     "ignoreUnknown": true
@@ -102,12 +103,7 @@
         // Disable this rule to allow Node.js modules for configuration files and scripts.
         "noNodejsModules": "off"
       },
-      "nursery": {
-        // Enforce the sorting of CSS utility classes.
-        "useSortedClasses": "error",
-        // Do not use nextTick(()=>{...}), use await nextTick() in Vue.
-        "useVueNextTickPromise": "error"
-      },
+      "nursery": {},
       "performance": {},
       "security": {},
       "style": {

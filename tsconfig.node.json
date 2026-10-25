@@ -1,24 +1,12 @@
 {
   "extends": "@tsconfig/node-lts/tsconfig.json",
-  "include": [
-    "env.d.ts",
-    "rsbuild.config.*",
-    "rslib.config.*",
-    "rslint.config.*",
-    "rspress.config.*",
-    "package.json"
-  ],
-  "exclude": [
-    "**/node_modules",
-    "**/.*/"
-  ],
+  "include": ["env.d.ts", "rstack.config.*", "package.json"],
+  "exclude": ["**/node_modules", "**/.*/"],
   "compilerOptions": {
     "composite": true,
     "noEmit": true,
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
     "resolveJsonModule": true,
     "tsBuildInfoFile": "./.rstack/.tmp/tsconfig.node.tsbuildinfo"

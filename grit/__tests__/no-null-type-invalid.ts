@@ -1,3 +1,5 @@
+/* rslint-disable */
+// @ts-nocheck: error check code
 // no-null-type — INVALID cases
 // Expected: 4 diagnostics (warn)
 
@@ -13,6 +15,8 @@ function processNumber(value: null | number) {
 
 // ✗ アロー関数パラメータ: T | null
 const handleUser = (user: User | null) => {
+  // rslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  // rslint-disable-next-line @typescript-eslint/no-unsafe-return
   return user?.name;
 };
 

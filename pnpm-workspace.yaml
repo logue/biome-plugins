@@ -1,26 +1,38 @@
 allowBuilds:
-  "@carbon/colors": true
-  "@carbon/feature-flags": true
-  "@carbon/grid": true
-  "@carbon/icon-helpers": true
-  "@carbon/icons": true
-  "@carbon/layout": false
-  "@carbon/motion": true
-  "@carbon/styles": true
-  "@carbon/themes": true
-  "@carbon/type": true
-  "@carbon/utilities": true
-  "@carbon/web-components": true
-  "@ibm/plex": true
-  "@ibm/plex-mono": true
-  "@ibm/plex-sans": true
-  "@ibm/plex-sans-arabic": false
-  "@ibm/plex-sans-devanagari": false
-  "@ibm/plex-sans-hebrew": false
-  "@ibm/plex-sans-thai": false
-  "@ibm/plex-sans-thai-looped": false
-  "@ibm/plex-serif": false
-  "@parcel/watcher": true
+  '@carbon/colors': true
+  '@carbon/feature-flags': true
+  '@carbon/grid': true
+  '@carbon/icon-helpers': true
+  '@carbon/icons': true
+  '@carbon/layout': false
+  '@carbon/motion': true
+  '@carbon/styles': true
+  '@carbon/themes': true
+  '@carbon/type': true
+  '@carbon/utilities': true
+  '@carbon/web-components': true
+  '@ibm/plex': true
+  '@ibm/plex-mono': true
+  '@ibm/plex-sans': true
+  '@ibm/plex-sans-arabic': false
+  '@ibm/plex-sans-devanagari': false
+  '@ibm/plex-sans-hebrew': false
+  '@ibm/plex-sans-thai': false
+  '@ibm/plex-sans-thai-looped': false
+  '@ibm/plex-serif': false
+  '@parcel/watcher': true
 # Do not enforce minimum release age for dependencies.
 # Version selection is delegated to package.json constraints.
 minimumReleaseAge: 0
+
+overrides:
+  katex: '>=0.19.0'
+
+# If you use rust, comment out bellow:
+# cargo:
+#  enabled: true
+
+# Agent skills
+skills:
+  dirs:
+    - .agents/skills
