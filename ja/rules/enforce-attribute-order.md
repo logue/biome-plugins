@@ -1,0 +1,74 @@
+> For AI agents: the complete documentation index is available at /biome-plugins/ja/llms.txt, the full documentation bundle is available at /biome-plugins/ja/llms-full.txt.
+
+# enforce-attribute-order
+
+warn
+
+JSX の属性は、定められたグループ順で記述しなければなりません。
+
+## 対象
+
+順序が逆になっている属性ペア。間に他の属性が挟まる非隣接なケースも検出します。`.jsx`・`.tsx` ファイルが対象です。
+
+## 理由
+
+属性順を統一することでマークアップが一目で読みやすくなります。下記の順序は [Vue.js 公式スタイルガイド](https://vuejs.org/style-guide/rules-recommended.html#element-attribute-order)と同じグループモデルのうち、JSX に関係する部分を採用しています。
+
+## グループ順（チェック対象のみ）
+
+| #  | グループ       | 属性          |
+| -- | ---------- | ----------- |
+| 0  | 制御フロー / 定義 | `key`       |
+| 1  | 一意 ID      | `id`        |
+| 3  | クラス        | `className` |
+| 8  | アクセシビリティ   | `aria-*`    |
+| 9  | データ属性      | `data-*`    |
+| 10 | イベント       | `on*`       |
+
+## 例
+
+### ✗ 違反
+
+```tsx
+// イベントが className より前
+<Button onClick={handleClick} className="btn">Click</Button>
+
+// className が id より前
+<div className="card" id="main-card" />
+
+// aria が className より前
+<nav aria-label="main" className="nav" />
+
+// data が className より前
+<section data-testid="hero" className="hero" />
+
+// イベントが id より前
+<button type="button" onClick={handleSubmit} id="submit-btn" />
+
+// key が id より後
+<Item id="x" key={k} />
+
+// 非隣接: 間に属性が挟まっていても className → id の順序違反を検出
+<div className="c" data-x="1" data-y="2" id="i" />
+```
+
+### ✓ 適正
+
+```tsx
+<Button className="btn" onClick={handleClick}>Click</Button>
+<div id="main-card" className="card" />
+<nav className="nav" aria-label="main" />
+<section className="hero" data-testid="hero" />
+<button id="submit-btn" type="button" onClick={handleSubmit} />
+<Item key={k} id="x" />
+```
+
+## 制限事項
+
+チェック対象は上記の JSX 属性（`key`, `id`, `className`, `aria-*`, `data-*`, `on*`）のみです。[PLAN.md](https://github.com/logue/biome-plugins/blob/main/PLAN.md) に記載の 11 グループ全体の順序はより広範囲をカバーしています。
+
+Vue・Svelte・素の HTML テンプレートは **対象外** です。Biome の GritQL プラグインは現時点で JavaScript/TypeScript（JSX 含む）・CSS・JSON の構文木に対してのみパターンをコンパイルできます。`.vue` や `.svelte` ファイルの `<script>` ブロックはこの経路で到達可能です（[`enforce-pure-src`](/biome-plugins/ja/rules/enforce-pure-src.md) 参照）が、テンプレート部分のマークアップには到達できません。テンプレート側の属性順序チェックは、Biome が GritQL のテンプレート言語対応を拡張するまで実装できません。
+
+## ソース
+
+[`grit/enforce-attribute-order.grit`](https://github.com/logue/biome-plugins/blob/main/grit/enforce-attribute-order.grit)

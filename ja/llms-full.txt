@@ -1,0 +1,625 @@
+---
+url: /biome-plugins/ja/guide/contributing.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/ja/llms.txt, the full documentation bundle is available at /biome-plugins/ja/llms-full.txt.
+
+# 貢献
+
+## 新しいルールの追加
+
+### 1 — GritQL ファイルの作成
+
+`grit/` ディレクトリに `.grit` ファイルを作成します。
+
+```sh
+touch grit/my-new-rule.grit
+```
+
+最小限のルール：
+
+```js
+// [Rationale] このパターンが禁止されている理由を説明する一文。
+//
+// ✗ 不適切なパターン
+// ✓ 適切な代替パターン
+`pattern to match $variable` where {
+  register_diagnostic(
+    message = "違反内容と代替案を説明します。（※英語で記入することを推奨します）",
+    severity = "error" // または "warn"
+  )
+}
+```
+
+### 2 — AGENTS.md へのドキュメントの追加
+
+`AGENTS.md` の `## Lint Rules` セクションに `### rule-name` を追加します。
+
+チェック対象、根拠、✗/✓ の例、および例外条件を含めてください。
+
+### 3 — ドキュメントページの追加
+
+既存のルールページの構造に従って、`docs/rules/my-new-rule.mdx` を作成してください。
+
+### 4 — サイドバーへの登録
+
+`rspress.config.ts` の `sidebar['/rules/']` にエントリを追加してください。
+
+### 5 — テスト
+
+```sh
+pnpm test
+```
+
+***
+
+## ルールの命名規則
+
+`kebab-case` を使用してください。名前は、**禁止** または **推奨** を表します。
+
+| プレフィックス     | 使用場面             | 例                        |
+| ----------- | ---------------- | ------------------------ |
+| `no-*`      | 特定のパターンを禁止       | `no-null-type`           |
+| `prefer-*`  | 代替型を推奨           | `prefer-union-over-enum` |
+| `enforce-*` | 構造的／アーキテクチャ上のルール | `enforce-pure-src`       |
+
+***
+
+## GritQL クイックリファレンス
+
+### パターンマッチ
+
+```js
+`code $variable { $body }` where { ... }
+```
+
+### 診断情報の登録
+
+```js
+register_diagnostic(
+  (message = "Human-readable message."),
+  (severity = "error" | "warn" | "info"),
+);
+```
+
+### 条件
+
+```js
+// ファイルパスが一致する必要があります
+$file_path.matches("^src/"),
+
+// キャプチャされた変数が正規表現に一致する必要があります
+$path.matches(".*(storybook|demo).*"),
+
+// カンマで結合 (AND)
+$file_path.matches("^src/"),
+$path.matches(".*(storybook).*"),
+```
+
+***
+
+## 重要度ガイド
+
+| 重要度     | 使用条件                                     |
+| ------- | ---------------------------------------- |
+| `error` | このコードベースでは、パターンは**常に間違っています**。曖昧さはありません。 |
+| `warn`  | パターンは**通常は間違っています**が、正当な例外があります。         |
+| `info`  | 情報提供のための注意喚起。問題ではありません。                  |
+
+
+
+---
+url: /biome-plugins/ja/guide/getting-started.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/ja/llms.txt, the full documentation bundle is available at /biome-plugins/ja/llms-full.txt.
+
+# はじめに
+
+## 前提条件
+
+- [Biome](https://biomejs.dev/) 2.5 以降
+- pnpm 10 以降 (または npm / yarn)
+
+## インストール
+
+```sh
+pnpm add -D @logue/biome-plugins
+```
+
+## 設定
+
+`biome.jsonc` に、必要なルールを登録してください。
+
+```jsonc
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.9/schema.json",
+  "plugins": [
+    {
+      "path": "./node_modules/@logue/biome-plugins/grit/enforce-pure-src.grit",
+    },
+    {
+      "path": "./node_modules/@logue/biome-plugins/grit/prefer-union-over-enum.grit",
+    },
+    {
+      "path": "./node_modules/@logue/biome-plugins/grit/no-null-type.grit",
+    },
+  ],
+}
+```
+
+
+## 検証
+
+Biome を実行して、ルールが有効になっていることを確認します。
+
+```sh
+pnpm biome lint .
+```
+
+意図的に違反するコードを記述し、診断メッセージが表示されることを確認します。
+
+```ts
+// prefer-union-over-enum がトリガーされるはずです → エラー
+enum Color {
+  Red = "red",
+}
+```
+
+## 選択的ロード
+
+必要なルールのみをロードできます。各`.grit`ファイルは独立しています。
+
+```jsonc
+{
+  "plugins": [
+    // 列挙ルールのみを読み込む
+    {
+      "path": "./node_modules/@logue/biome-plugins/grit/prefer-union-over-enum.grit",
+    },
+  ],
+}
+```
+
+
+
+---
+url: /biome-plugins/ja/rules/enforce-attribute-order.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/ja/llms.txt, the full documentation bundle is available at /biome-plugins/ja/llms-full.txt.
+
+# enforce-attribute-order
+
+warn
+
+JSX の属性は、定められたグループ順で記述しなければなりません。
+
+## 対象
+
+順序が逆になっている属性ペア。間に他の属性が挟まる非隣接なケースも検出します。`.jsx`・`.tsx` ファイルが対象です。
+
+## 理由
+
+属性順を統一することでマークアップが一目で読みやすくなります。下記の順序は [Vue.js 公式スタイルガイド](https://vuejs.org/style-guide/rules-recommended.html#element-attribute-order)と同じグループモデルのうち、JSX に関係する部分を採用しています。
+
+## グループ順（チェック対象のみ）
+
+| #  | グループ       | 属性          |
+| -- | ---------- | ----------- |
+| 0  | 制御フロー / 定義 | `key`       |
+| 1  | 一意 ID      | `id`        |
+| 3  | クラス        | `className` |
+| 8  | アクセシビリティ   | `aria-*`    |
+| 9  | データ属性      | `data-*`    |
+| 10 | イベント       | `on*`       |
+
+## 例
+
+### ✗ 違反
+
+```tsx
+// イベントが className より前
+<Button onClick={handleClick} className="btn">Click</Button>
+
+// className が id より前
+<div className="card" id="main-card" />
+
+// aria が className より前
+<nav aria-label="main" className="nav" />
+
+// data が className より前
+<section data-testid="hero" className="hero" />
+
+// イベントが id より前
+<button type="button" onClick={handleSubmit} id="submit-btn" />
+
+// key が id より後
+<Item id="x" key={k} />
+
+// 非隣接: 間に属性が挟まっていても className → id の順序違反を検出
+<div className="c" data-x="1" data-y="2" id="i" />
+```
+
+### ✓ 適正
+
+```tsx
+<Button className="btn" onClick={handleClick}>Click</Button>
+<div id="main-card" className="card" />
+<nav className="nav" aria-label="main" />
+<section className="hero" data-testid="hero" />
+<button id="submit-btn" type="button" onClick={handleSubmit} />
+<Item key={k} id="x" />
+```
+
+## 制限事項
+
+チェック対象は上記の JSX 属性（`key`, `id`, `className`, `aria-*`, `data-*`, `on*`）のみです。[PLAN.md](https://github.com/logue/biome-plugins/blob/main/PLAN.md) に記載の 11 グループ全体の順序はより広範囲をカバーしています。
+
+Vue・Svelte・素の HTML テンプレートは **対象外** です。Biome の GritQL プラグインは現時点で JavaScript/TypeScript（JSX 含む）・CSS・JSON の構文木に対してのみパターンをコンパイルできます。`.vue` や `.svelte` ファイルの `<script>` ブロックはこの経路で到達可能です（[`enforce-pure-src`](/biome-plugins/ja/rules/enforce-pure-src.md) 参照）が、テンプレート部分のマークアップには到達できません。テンプレート側の属性順序チェックは、Biome が GritQL のテンプレート言語対応を拡張するまで実装できません。
+
+## ソース
+
+[`grit/enforce-attribute-order.grit`](https://github.com/logue/biome-plugins/blob/main/grit/enforce-attribute-order.grit)
+
+
+
+---
+url: /biome-plugins/ja/rules/enforce-pure-src.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/ja/llms.txt, the full documentation bundle is available at /biome-plugins/ja/llms-full.txt.
+
+# enforce-pure-src
+
+error
+
+`src/` ディレクトリには、プロダクション時のコードと、同じ場所に配置された単体テストのみを含める必要があります。
+
+Storybook、デモ、サンドボックスのコンテンツは、`src/` ディレクトリの外に配置する必要があります。
+
+## チェック対象
+
+`src/` ディレクトリをルートとするファイル内のインポート文で、`storybook`、`demo`、`sandbox`、または `preview` を含むパスに解決されるもの。
+
+## 理由
+
+ライブラリの `src/` ディレクトリは、パッケージの公開される表面を表します。
+
+デモコードとドキュメントコードは、ライブラリを **外部から**、つまり
+利用者の視点から見ています。これらを `src/` ディレクトリに混在させると、次の 2 つの問題が発生します。
+
+1. **バンドルへの意図しない混入** バンドラーがデモコードを誤って本番出力に取り込んでしまう可能性があります。
+2. **責任の所在が曖昧になる。** どのコードが製品に同梱され、どのコードがローカル開発専用なのかが不明確になる。
+
+​​外部視点のコンテンツは、同じディレクトリ（`src-docs/`、`src-demo/`など）に配置し、ライブラリを外部モジュールとして参照する。
+
+## 例
+
+### ✗ 誤り
+
+```ts
+// src/components/Button.ts
+import { ButtonDemo } from "../storybook/ButtonDemo";
+
+import preview from "../demo/preview";
+```
+
+### ✓ 正しい
+
+```ts
+// src-docs/components/ButtonDemo.ts ← src/ ディレクトリ外
+import { Button } from "@logue/my-lib"; // 外部参照として参照
+```
+
+## ソース
+
+[`grit/enforce-pure-src.grit`](https://github.com/logue/biome-plugins/blob/main/grit/enforce-pure-src.grit)
+
+
+
+---
+url: /biome-plugins/ja/rules/index.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/ja/llms.txt, the full documentation bundle is available at /biome-plugins/ja/llms-full.txt.
+
+# ルール一覧
+
+すべてのルールは [GritQL](https://docs.grit.io/) で記述され、Biome プラグインとして読み込まれます。
+各ルールファイルは独立しているため、必要なものだけを選んで使用できます。
+
+## 利用可能なルール
+
+| ルール                                                                           | 重大度                                             | 検出内容                                |
+| ----------------------------------------------------------------------------- | ----------------------------------------------- | ----------------------------------- |
+| [enforce-attribute-order](/biome-plugins/ja/rules/enforce-attribute-order.md) | <cds-tag type="purple" size="sm">warn</cds-tag> | JSX 属性のグループ順序違反を検出                  |
+| [enforce-pure-src](/biome-plugins/ja/rules/enforce-pure-src.md)               | <cds-tag type="red" size="sm">error</cds-tag>   | `src/` 内への Storybook / デモ用インポートを禁止  |
+| [no-null-type](/biome-plugins/ja/rules/no-null-type.md)                       | <cds-tag type="purple" size="sm">warn</cds-tag> | 型アノテーションでの `\| null` を検出            |
+| [prefer-union-over-enum](/biome-plugins/ja/rules/prefer-union-over-enum.md)   | <cds-tag type="red" size="sm">error</cds-tag>   | `enum` および `const enum` を禁止         |
+| [vue-multi-word-filename](/biome-plugins/ja/rules/vue-multi-word-filename.md) | <cds-tag type="red" size="sm">error</cds-tag>   | Vue ファイル名が複数ワード PascalCase でない場合を検出 |
+
+## ルールファイルの場所
+
+ルールはパッケージルートの `grit/` ディレクトリに配置されています。
+`biome.jsonc` でのインポートパス:
+
+```
+node_modules/@logue/biome-plugins/grit/enforce-attribute-order.grit
+node_modules/@logue/biome-plugins/grit/enforce-pure-src.grit
+node_modules/@logue/biome-plugins/grit/no-null-type.grit
+node_modules/@logue/biome-plugins/grit/prefer-union-over-enum.grit
+node_modules/@logue/biome-plugins/grit/vue-multi-word-filename.grit
+```
+
+
+
+---
+url: /biome-plugins/ja/rules/no-null-type.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/ja/llms.txt, the full documentation bundle is available at /biome-plugins/ja/llms-full.txt.
+
+# no-null-type
+
+warn
+
+型注釈の位置では、`| null` は禁止されています。
+
+存在しない場合は、`undefined` またはオプションの `?` を使用してください。
+
+## チェック対象
+
+`| null` (または `null |`) が以下の場所に出現している場合：
+
+- 関数のパラメータ型注釈
+- アロー関数のパラメータ型注釈
+- 初期化子を持つ変数/プロパティ型注釈
+
+## 理由
+
+TypeScript には、「値がない」ことを表す方法が `null` と `undefined` の 2 つあります。
+
+これらを混在させると、呼び出し箇所ごとに認知的な負担が生じます。
+
+```ts
+// 呼び出し側は、null と undefined のどちらを渡すべきかを考えなければなりません。
+
+function process(str: string | null) {}
+```
+
+`undefined` は TypeScript における標準的な不在値です。
+
+- `Partial<T>` は `null` ではなく `undefined` を使用します。
+- オプショナルチェイニング (`?.`) と null 合体 (`??`) は `undefined` のために設計されました。
+- `JSON.stringify` は `undefined` 値を省略しますが、`null` はシリアライズします。`null` が適切なのは、シリアライズ時のみです (下記の例外を参照)。
+
+`undefined` のみを使用することで、コードベース内のすべての型が簡素化されます。
+
+詳細については、[TypeScript のコーディングガイドライン](https://github.com/microsoft/TypeScript/wiki/Coding-guidelines#null-and-undefined)をご覧になってください。
+
+## 例
+
+### ✗ 誤り
+
+```ts
+function process(str: string | null) {}
+
+const handler = (data: { value: string | null }) => {};
+
+let current: Item | null = null;
+```
+
+### ✓ 正しい
+
+```ts
+function process(str?: string) {}
+
+const handler = (data: { value?: string }) => {};
+
+let current: Item | undefined;
+```
+
+## 例外 — JSON変換境界
+
+`JSON.parse`の直後では、データに`null`が含まれる可能性があります。
+
+境界で`undefined`に正規化してから、下流に渡します。
+
+```ts
+// ✓ 境界層 — ここではnullが許容されます
+const raw = JSON.parse(json) as { value: string | null };
+
+const normalized = {
+  value: raw.value ?? undefined,
+};
+
+// ✓ 下流 — undefinedのみ
+process(normalized.value);
+```
+
+
+## ソース
+
+[`grit/no-null-type.grit`](https://github.com/logue/biome-plugins/blob/main/grit/no-null-type.grit)
+
+
+
+---
+url: /biome-plugins/ja/rules/prefer-union-over-enum.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/ja/llms.txt, the full documentation bundle is available at /biome-plugins/ja/llms-full.txt.
+
+# prefer-union-over-enum
+
+error
+
+`enum` および `const enum` の宣言は禁止されています。代わりにUnion型を使用してください。
+
+## チェック対象
+
+`enum Name { ... }` または `const enum Name { ... }` の宣言。
+
+## 理由
+
+TypeScript の enum には、共用型では完全に回避できるいくつかの欠点があります。
+
+- **ランタイム コード。** 通常の `enum` は、逆マッピング オブジェクトを作成する IIFE にコンパイルされます。これは、ツリーシェイカーにとってデッド コードであり、バンドルごとに余分なバイトが発生します。
+- **暗黙的な数値マッピング。** `enum Direction { Up, Down }` は、暗黙的に `0` と `1` を割り当てます。`Direction` が期待される場所に任意の数値を渡しても、型エラーになるのはごくまれです。
+- **インポートのオーバーヘッド。** 列挙型は型のインポートに加えて値のインポートも必要とするため、バレルファイルや型のみのインポートが複雑になります。
+
+共用型はコンパイル時に完全に消去され、`as const` オブジェクトと自然に連携して、網羅的なマップを作成できます。
+
+## 例
+
+### ✗ 誤り
+
+```ts
+enum Color {
+  Red = "red",
+  Green = "green",
+}
+const enum Direction {
+  Up,
+  Down,
+}
+```
+
+### ✓ 正しい
+
+```ts
+// 型 — コンパイル時に消去されます
+export type Color = "red" | "green";
+
+// 有効な値の配列 — 検証に役立ちます
+export const colors: Color[] = ["red", "green"];
+
+// 実装へのマップ — enum の使用例を反映
+export const Color: Record<Color, ColorValue> = {
+  red: redColorValue,
+  green: greenColorValue,
+};
+```
+
+コンシューマーは必要なものだけをインポートします。
+
+```ts
+import type { Color } from "./types/Color.d.ts";
+import { Color } from "./types/Color.ts"; // const マップ
+```
+
+## 例外
+
+なし。このコードベースでは `enum` は決して適切な選択肢ではありません。
+
+## ソース
+
+[`grit/prefer-union-over-enum.grit`](https://github.com/logue/biome-plugins/blob/main/grit/prefer-union-over-enum.grit)
+
+
+
+---
+url: /biome-plugins/ja/rules/vue-multi-word-filename.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/ja/llms.txt, the full documentation bundle is available at /biome-plugins/ja/llms-full.txt.
+
+# vue-multi-word-filename
+
+error
+
+Vue コンポーネントのファイル名は、複数ワードの PascalCase（2語以上）でなければなりません。
+
+## 対象
+
+ベース名が1語の PascalCase である `.vue` ファイル（例: `Todo.vue`、`Button.vue`、`Header.vue`）。
+
+## 理由
+
+[Vue.js 公式スタイルガイド](https://vuejs.org/style-guide/rules-essential.html#use-multi-word-component-names)の必須ルールとして、コンポーネント名に複数ワードを使うことが要求されています。1語のコンポーネント名は、既存および将来の HTML 要素名と衝突するリスクがあります。
+
+## 例外
+
+以下のファイルはこのルールの対象外です。
+
+- `index.vue` — コンベンションとして認められたエントリポイント
+- `pages/` ディレクトリ以下のファイル — Nuxt / Vue Router の規約に従うページコンポーネントは除外
+
+## 例
+
+### ✗ 違反
+
+```
+# ファイル名
+Todo.vue
+Button.vue
+Header.vue
+```
+
+```vue
+<!-- Todo.vue -->
+<template>
+  <div class="todo">
+    <slot />
+  </div>
+</template>
+```
+
+### ✓ 適正
+
+```
+# ファイル名
+TodoList.vue
+BaseButton.vue
+TheHeader.vue
+index.vue          ← 慣例的に除外
+pages/about.vue    ← pages/ ディレクトリのため除外
+```
+
+```vue
+<!-- TodoList.vue -->
+<template>
+  <ul class="todo-list">
+    <slot />
+  </ul>
+</template>
+```
+
+## 制限事項
+
+ルールは「ファイル名に大文字が2つ以上含まれる」ことを PascalCase 複数ワードの判定基準とします。`UICard.vue` のように略語が2つの大文字を含む場合は検出されません。厳密に2語を強制したい場合は `UiCard.vue` や `CardUI.vue` などに改名してください。
+
+## ソース
+
+[`grit/vue-multi-word-filename.grit`](https://github.com/logue/biome-plugins/blob/main/grit/vue-multi-word-filename.grit)
+
+
+
+---
+url: /biome-plugins/ja/index.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/ja/llms.txt, the full documentation bundle is available at /biome-plugins/ja/llms-full.txt.
+
+# @logue/biome-plugins
+
+カスタムBiome Lintルール
+
+> GritQLベースのルールで、Rstackプロジェクト全体で一貫したTypeScriptの規約を強制します。 1つのパッケージで、すべてのテンプレートに対応します。
+
+
+[はじめに →](/ja/guide/getting-started) | [ルール一覧](/ja/rules/)
+
+## Features
+
+- 🔍 **GritQL対応**: ルールはGritQLで記述され、Biome 2.xでネイティブに実行されます。 追加のランタイムやポストプロセッサは不要です。
+
+- ⚡ **Rstackファースト**: Rslib、Rsbuild、Rspressベースのプロジェクト向けに設計されています。 Biomeが動作するあらゆるコードベースで動作します。
+
+- 📐 **唯一の信頼できる情報源**: TypeScript の規約はここに集約されます。各プロジェクトの AGENTS.md に重複して記述する必要はありません。 ルールを一度追加すれば、すべてのテンプレートが恩恵を受けます。
+
+- 🧩 **フレームワーク対応**: Vue、Tauri、または UI ライブラリ用の新しいルールは、追加の .grit ファイルとして挿入されます。 プロジェクトごとの設定を肥大化させることなく拡張できます。
+
+
+

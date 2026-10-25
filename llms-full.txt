@@ -1,0 +1,621 @@
+---
+url: /biome-plugins/guide/contributing.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/llms.txt, the full documentation bundle is available at /biome-plugins/llms-full.txt.
+
+# Contributing
+
+## Adding a New Rule
+
+### 1 — Write the GritQL file
+
+Create a `.grit` file in `grit/`:
+
+```sh
+touch grit/my-new-rule.grit
+```
+
+A minimal rule:
+
+```js
+// [Rationale] One sentence explaining why this pattern is banned.
+//
+// ✗  bad pattern
+// ✓  good alternative
+
+`pattern to match $variable` where {
+  register_diagnostic(
+    message = "Explain the violation and what to do instead.",
+    severity = "error"  // or "warn"
+  )
+}
+```
+
+### 2 — Document it in AGENTS.md
+
+Add a `### rule-name` section under `## Lint Rules` in `AGENTS.md`.
+Include: what it checks, the rationale, a ✗/✓ example, and any exception conditions.
+
+### 3 — Add a docs page
+
+Create `docs/rules/my-new-rule.mdx` following the structure of the existing rule pages.
+
+### 4 — Register it in the sidebar
+
+Add an entry to `rspress.config.ts` under `sidebar['/rules/']`.
+
+### 5 — Test
+
+```sh
+pnpm test
+```
+
+***
+
+## Rule Naming
+
+Use `kebab-case`. Names describe what is **disallowed** or **preferred**:
+
+| Prefix      | When to use                     | Example                  |
+| ----------- | ------------------------------- | ------------------------ |
+| `no-*`      | Bans a specific pattern         | `no-null-type`           |
+| `prefer-*`  | Promotes an alternative         | `prefer-union-over-enum` |
+| `enforce-*` | Structural / architectural rule | `enforce-pure-src`       |
+
+***
+
+## GritQL Quick Reference
+
+### Pattern match
+
+```js
+`code $variable { $body }` where { ... }
+```
+
+### Register a diagnostic
+
+```js
+register_diagnostic(
+  message = "Human-readable message.",
+  severity = "error" | "warn" | "info"
+)
+```
+
+### Conditions
+
+```js
+// File path must match
+$file_path.matches("^src/"),
+
+// Captured variable must match a regex
+$path.matches(".*(storybook|demo).*"),
+
+// Combine with comma (AND)
+$file_path.matches("^src/"),
+$path.matches(".*(storybook).*"),
+```
+
+***
+
+## Severity Guide
+
+| Severity | Use when                                                        |
+| -------- | --------------------------------------------------------------- |
+| `error`  | The pattern is **always wrong** in this codebase — no ambiguity |
+| `warn`   | The pattern is **usually wrong** but has legitimate exceptions  |
+| `info`   | Informational nudge; not a blocker                              |
+
+
+
+---
+url: /biome-plugins/guide/getting-started.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/llms.txt, the full documentation bundle is available at /biome-plugins/llms-full.txt.
+
+# Getting Started
+
+## Prerequisites
+
+- [Biome](https://biomejs.dev/) 2.5 or later
+- pnpm 10 or later (or npm / yarn)
+
+## Installation
+
+```sh
+pnpm add -D @logue/biome-plugins
+```
+
+## Configuration
+
+Register the rules you want in your `biome.jsonc`:
+
+```jsonc
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.9/schema.json",
+  "plugins": [
+    {
+      "path": "./node_modules/@logue/biome-plugins/grit/enforce-pure-src.grit",
+    },
+    {
+      "path": "./node_modules/@logue/biome-plugins/grit/prefer-union-over-enum.grit",
+    },
+    {
+      "path": "./node_modules/@logue/biome-plugins/grit/no-null-type.grit",
+    },
+  ],
+}
+```
+
+
+## Verify
+
+Run Biome to confirm the rules are active:
+
+```sh
+pnpm biome lint .
+```
+
+Write a deliberate violation and check that a diagnostic appears:
+
+```ts
+// should trigger prefer-union-over-enum → error
+enum Color {
+  Red = "red",
+}
+```
+
+## Selective Loading
+
+You can load only the rules you need. Each `.grit` file is independent:
+
+```jsonc
+{
+  "plugins": [
+    // Load only the enum rule
+    {
+      "path": "./node_modules/@logue/biome-plugins/grit/prefer-union-over-enum.grit",
+    },
+  ],
+}
+```
+
+
+
+---
+url: /biome-plugins/rules/enforce-attribute-order.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/llms.txt, the full documentation bundle is available at /biome-plugins/llms-full.txt.
+
+# enforce-attribute-order
+
+warn
+
+JSX attributes must be written in the prescribed group order.
+
+## What it checks
+
+Out-of-order attribute pairs — including non-adjacent ones (other attributes may sit between the two being compared). The rule covers `.jsx` and `.tsx` files.
+
+## Why
+
+A consistent attribute order makes component markup scannable at a glance. The ordering below is derived from the same group model as the [Vue.js official style guide](https://vuejs.org/style-guide/rules-recommended.html#element-attribute-order), applied to the JSX-relevant subset.
+
+## Group order (checked subset)
+
+| #  | Group                     | Attribute   |
+| -- | ------------------------- | ----------- |
+| 0  | Control Flow / Definition | `key`       |
+| 1  | Unique ID                 | `id`        |
+| 3  | Class                     | `className` |
+| 8  | Accessibility             | `aria-*`    |
+| 9  | Data                      | `data-*`    |
+| 10 | Events                    | `on*`       |
+
+## Examples
+
+### ✗ Incorrect
+
+```tsx
+// Event before className
+<Button onClick={handleClick} className="btn">Click</Button>
+
+// className before id
+<div className="card" id="main-card" />
+
+// aria before className
+<nav aria-label="main" className="nav" />
+
+// data before className
+<section data-testid="hero" className="hero" />
+
+// event before id
+<button type="button" onClick={handleSubmit} id="submit-btn" />
+
+// key after id
+<Item id="x" key={k} />
+
+// non-adjacent: className still comes before id even with attributes in between
+<div className="c" data-x="1" data-y="2" id="i" />
+```
+
+### ✓ Correct
+
+```tsx
+<Button className="btn" onClick={handleClick}>Click</Button>
+<div id="main-card" className="card" />
+<nav className="nav" aria-label="main" />
+<section className="hero" data-testid="hero" />
+<button id="submit-btn" type="button" onClick={handleSubmit} />
+<Item key={k} id="x" />
+```
+
+## Limitations
+
+Only the JSX attributes above are checked (`key`, `id`, `className`, `aria-*`, `data-*`, `on*`) — the full 11-group ordering scheme described in [PLAN.md](https://github.com/logue/biome-plugins/blob/main/PLAN.md) is broader.
+
+Vue, Svelte, and plain HTML templates are **not covered**. Biome's GritQL plugin engine currently compiles snippets only against JavaScript/TypeScript (including JSX), CSS, and JSON syntax trees — a `.vue` or `.svelte` file's `<script>` block is reachable this way (see [`enforce-pure-src`](/biome-plugins/rules/enforce-pure-src.md)), but its template markup is not. Template-level attribute ordering will need to wait for Biome to extend GritQL to template languages.
+
+## Source
+
+[`grit/enforce-attribute-order.grit`](https://github.com/logue/biome-plugins/blob/main/grit/enforce-attribute-order.grit)
+
+
+
+---
+url: /biome-plugins/rules/enforce-pure-src.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/llms.txt, the full documentation bundle is available at /biome-plugins/llms-full.txt.
+
+# enforce-pure-src
+
+error
+
+`src/` must contain only production code and co-located unit tests.
+Storybook, demo, and sandbox content must live outside `src/`.
+
+## What it checks
+
+Any import statement **inside a `src/`-rooted file** that resolves to a path
+containing `storybook`, `demo`, `sandbox`, or `preview`.
+
+## Why
+
+A library's `src/` directory represents the published surface of the package.
+Demo and documentation code views the library **from the outside** — as a
+consumer would. Mixing them into `src/` creates two problems:
+
+1. **Accidental inclusion in the bundle.** Bundlers can mis-tree-shake demo
+   code into the production output.
+2. **Blurred responsibility.** It becomes unclear which code ships and which
+   is only for local development.
+
+Place external-perspective content in a sibling directory (`src-docs/`,
+`src-demo/`, etc.) and reference the library as an external module there.
+
+## Examples
+
+### ✗ Incorrect
+
+```ts
+// src/components/Button.ts
+import { ButtonDemo } from "../storybook/ButtonDemo";
+import preview from "../demo/preview";
+```
+
+### ✓ Correct
+
+```ts
+// src-docs/components/ButtonDemo.ts  ← outside src/
+import { Button } from "@logue/my-lib"; // reference as external
+```
+
+## Source
+
+[`grit/enforce-pure-src.grit`](https://github.com/logue/biome-plugins/blob/main/grit/enforce-pure-src.grit)
+
+
+
+---
+url: /biome-plugins/rules/index.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/llms.txt, the full documentation bundle is available at /biome-plugins/llms-full.txt.
+
+# Rules
+
+All rules are written in [GritQL](https://docs.grit.io/) and loaded as Biome plugins.
+Each rule file is independent — load only what you need.
+
+## Available Rules
+
+| Rule                                                                       | Severity                                        | What it checks                              |
+| -------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------- |
+| [enforce-attribute-order](/biome-plugins/rules/enforce-attribute-order.md) | <cds-tag type="purple" size="sm">warn</cds-tag> | JSX attributes must follow group order      |
+| [enforce-pure-src](/biome-plugins/rules/enforce-pure-src.md)               | <cds-tag type="red" size="sm">error</cds-tag>   | No Storybook / demo imports inside `src/`   |
+| [no-null-type](/biome-plugins/rules/no-null-type.md)                       | <cds-tag type="purple" size="sm">warn</cds-tag> | `\| null` in type annotation positions      |
+| [prefer-union-over-enum](/biome-plugins/rules/prefer-union-over-enum.md)   | <cds-tag type="red" size="sm">error</cds-tag>   | `enum` and `const enum` are forbidden       |
+| [vue-multi-word-filename](/biome-plugins/rules/vue-multi-word-filename.md) | <cds-tag type="red" size="sm">error</cds-tag>   | Vue filenames must be multi-word PascalCase |
+
+## Rule Locations
+
+Rules live in the `grit/` directory at the root of this package.
+Import paths for `biome.jsonc`:
+
+```
+node_modules/@logue/biome-plugins/grit/enforce-attribute-order.grit
+node_modules/@logue/biome-plugins/grit/enforce-pure-src.grit
+node_modules/@logue/biome-plugins/grit/no-null-type.grit
+node_modules/@logue/biome-plugins/grit/prefer-union-over-enum.grit
+node_modules/@logue/biome-plugins/grit/vue-multi-word-filename.grit
+```
+
+
+
+---
+url: /biome-plugins/rules/no-null-type.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/llms.txt, the full documentation bundle is available at /biome-plugins/llms-full.txt.
+
+# no-null-type
+
+warn
+
+`| null` is forbidden in type annotation positions.
+Use `undefined` / optional (`?`) to represent absence.
+
+## What it checks
+
+`| null` (or `null |`) appearing in:
+
+- Function parameter type annotations
+- Arrow function parameter type annotations
+- Variable / property type annotations with an initializer
+
+## Why
+
+TypeScript has two ways to represent "no value": `null` and `undefined`.
+Mixing them creates cognitive overhead at every call site:
+
+```ts
+// Caller now has to think: which should I pass — null or undefined?
+function process(str: string | null) {}
+```
+
+`undefined` is TypeScript's canonical absence value:
+
+- `Partial<T>` uses `undefined`, not `null`
+- Optional chaining (`?.`) and nullish coalescing (`??`) were designed for `undefined`
+- `JSON.stringify` omits `undefined` values but serialises `null` — which is the _only_ place `null` is appropriate (see exception below)
+
+Committing to `undefined`-only simplifies every type in the codebase.
+
+See [TypeScript coding guidelines](https://github.com/microsoft/TypeScript/wiki/Coding-guidelines#null-and-undefined) for detail.
+
+## Examples
+
+### ✗ Incorrect
+
+```ts
+function process(str: string | null) {}
+
+const handler = (data: { value: string | null }) => {};
+
+let current: Item | null = null;
+```
+
+### ✓ Correct
+
+```ts
+function process(str?: string) {}
+
+const handler = (data: { value?: string }) => {};
+
+let current: Item | undefined;
+```
+
+## Exception — JSON transformation boundary
+
+Immediately after `JSON.parse`, the data may contain `null`.
+Normalise it to `undefined` at the boundary before passing it downstream:
+
+```ts
+// ✓  Boundary layer — null is allowed here
+const raw = JSON.parse(json) as { value: string | null };
+const normalized = {
+  value: raw.value ?? undefined,
+};
+
+// ✓  Downstream — undefined only
+process(normalized.value);
+```
+
+
+## Source
+
+[`grit/no-null-type.grit`](https://github.com/logue/biome-plugins/blob/main/grit/no-null-type.grit)
+
+
+
+---
+url: /biome-plugins/rules/prefer-union-over-enum.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/llms.txt, the full documentation bundle is available at /biome-plugins/llms-full.txt.
+
+# prefer-union-over-enum
+
+error
+
+`enum` and `const enum` declarations are forbidden. Use union types instead.
+
+## What it checks
+
+Any `enum Name { ... }` or `const enum Name { ... }` declaration.
+
+## Why
+
+TypeScript enums have several drawbacks that union types avoid entirely:
+
+- **Runtime code.** A regular `enum` compiles to an IIFE that creates a reverse-mapping object — dead code for tree-shakers and extra bytes in every bundle.
+- **Implicit numeric mapping.** `enum Direction { Up, Down }` silently assigns `0` and `1`. Passing an arbitrary number where `Direction` is expected is a type error only sometimes.
+- **Import overhead.** Enums require a value import in addition to a type import, complicating barrel files and type-only imports.
+
+Union types are erased entirely at compile time and work naturally with `as const` objects for exhaustive maps.
+
+## Examples
+
+### ✗ Incorrect
+
+```ts
+enum Color {
+  Red = "red",
+  Green = "green",
+}
+const enum Direction {
+  Up,
+  Down,
+}
+```
+
+### ✓ Correct
+
+```ts
+// Type — erased at compile time
+export type Color = "red" | "green";
+
+// Array of valid values — useful for validation
+export const colors: Color[] = ["red", "green"];
+
+// Map to implementations — mirrors the enum use-case
+export const Color: Record<Color, ColorValue> = {
+  red: redColorValue,
+  green: greenColorValue,
+};
+```
+
+Consumers import only what they need:
+
+```ts
+import type { Color } from "./types/Color.d.ts";
+import { Color } from "./types/Color.ts"; // the const map
+```
+
+## Exceptions
+
+None. `enum` is never the right choice in this codebase.
+
+## Source
+
+[`grit/prefer-union-over-enum.grit`](https://github.com/logue/biome-plugins/blob/main/grit/prefer-union-over-enum.grit)
+
+
+
+---
+url: /biome-plugins/rules/vue-multi-word-filename.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/llms.txt, the full documentation bundle is available at /biome-plugins/llms-full.txt.
+
+# vue-multi-word-filename
+
+error
+
+Vue component filenames must use multi-word PascalCase (two or more words).
+
+## What it checks
+
+Any `.vue` file whose basename contains only one PascalCase word — for example `Todo.vue`, `Button.vue`, or `Header.vue`.
+
+## Why
+
+The [Vue.js official style guide](https://vuejs.org/style-guide/rules-essential.html#use-multi-word-component-names) requires multi-word component names as an essential rule. Single-word names risk collision with existing and future HTML elements.
+
+## Exceptions
+
+The following files are excluded from this rule:
+
+- `index.vue` — a conventional entry point, not a named component
+- Files under a `pages/` directory — page components follow Nuxt / Vue Router conventions and are excluded
+
+## Examples
+
+### ✗ Incorrect
+
+```
+# Filenames
+Todo.vue
+Button.vue
+Header.vue
+```
+
+```vue
+<!-- Todo.vue -->
+<template>
+  <div class="todo">
+    <slot />
+  </div>
+</template>
+```
+
+### ✓ Correct
+
+```
+# Filenames
+TodoList.vue
+BaseButton.vue
+TheHeader.vue
+index.vue       ← excluded by convention
+pages/about.vue ← excluded (pages directory)
+```
+
+```vue
+<!-- TodoList.vue -->
+<template>
+  <ul class="todo-list">
+    <slot />
+  </ul>
+</template>
+```
+
+## Limitations
+
+The rule checks that the filename contains at least two uppercase letters (i.e. multi-word PascalCase). Abbreviations that happen to contain two uppercase letters such as `UICard.vue` are accepted — rename them to `UiCard.vue` or `CardUI.vue` if you need strict two-word enforcement.
+
+## Source
+
+[`grit/vue-multi-word-filename.grit`](https://github.com/logue/biome-plugins/blob/main/grit/vue-multi-word-filename.grit)
+
+
+
+---
+url: /biome-plugins/index.md
+---
+
+> For AI agents: the complete documentation index is available at /biome-plugins/llms.txt, the full documentation bundle is available at /biome-plugins/llms-full.txt.
+
+# @logue/biome-plugins
+
+Custom Biome Lint Rules
+
+> GritQL-based rules that enforce consistent TypeScript conventions across Rstack projects — one package, every template.
+
+
+[Get Started →](/guide/getting-started) | [Browse Rules](/rules/)
+
+## Features
+
+- 🔍 **GritQL-Powered**: Rules are written in GritQL and executed natively by Biome 2.x. No extra runtime, no post-processors.
+
+- ⚡ **Rstack-First**: Designed for Rslib, Rsbuild, and Rspress-based projects. Works in any codebase that runs Biome.
+
+- 📐 **Single Source of Truth**: TypeScript conventions live here — not duplicated across every project's AGENTS.md. Add a rule once; all templates benefit.
+
+- 🧩 **Framework-Ready**: New rules for Vue, Tauri, or UI libraries slot in as additional .grit files. Extend without bloating per-project configs.
+
+
+

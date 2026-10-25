@@ -1,0 +1,17 @@
+# @logue/biome-plugins
+
+> Custom Biome lint rules written as GritQL plugins
+
+## Guide
+
+- [Contributing](/biome-plugins/guide/contributing.md)
+- [Getting Started](/biome-plugins/guide/getting-started.md)
+
+## Rules
+
+- [enforce-attribute-order](/biome-plugins/rules/enforce-attribute-order.md): <cds-tag type="purple">warn</cds-tag> JSX attributes must be written in the prescribed group order.
+- [enforce-pure-src](/biome-plugins/rules/enforce-pure-src.md): <cds-tag type="red">error</cds-tag> src/ must contain only production code and co-located unit tests. Storybook, demo, and sandbox content must live outside src/.
+- [Rules](/biome-plugins/rules/index.md): All rules are written in GritQL and loaded as Biome plugins. Each rule file is independent — load only what you need.
+- [no-null-type](/biome-plugins/rules/no-null-type.md): <cds-tag type="purple">warn</cds-tag> | null is forbidden in type annotation positions. Use undefined / optional (?) to represent absence.
+- [prefer-union-over-enum](/biome-plugins/rules/prefer-union-over-enum.md): <cds-tag type="red">error</cds-tag> enum and const enum declarations are forbidden. Use union types instead.
+- [vue-multi-word-filename](/biome-plugins/rules/vue-multi-word-filename.md): <cds-tag type="red">error</cds-tag> Vue component filenames must use multi-word PascalCase (two or more words).

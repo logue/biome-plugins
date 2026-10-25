@@ -1,0 +1,74 @@
+> For AI agents: the complete documentation index is available at /biome-plugins/llms.txt, the full documentation bundle is available at /biome-plugins/llms-full.txt.
+
+# enforce-attribute-order
+
+warn
+
+JSX attributes must be written in the prescribed group order.
+
+## What it checks
+
+Out-of-order attribute pairs — including non-adjacent ones (other attributes may sit between the two being compared). The rule covers `.jsx` and `.tsx` files.
+
+## Why
+
+A consistent attribute order makes component markup scannable at a glance. The ordering below is derived from the same group model as the [Vue.js official style guide](https://vuejs.org/style-guide/rules-recommended.html#element-attribute-order), applied to the JSX-relevant subset.
+
+## Group order (checked subset)
+
+| #  | Group                     | Attribute   |
+| -- | ------------------------- | ----------- |
+| 0  | Control Flow / Definition | `key`       |
+| 1  | Unique ID                 | `id`        |
+| 3  | Class                     | `className` |
+| 8  | Accessibility             | `aria-*`    |
+| 9  | Data                      | `data-*`    |
+| 10 | Events                    | `on*`       |
+
+## Examples
+
+### ✗ Incorrect
+
+```tsx
+// Event before className
+<Button onClick={handleClick} className="btn">Click</Button>
+
+// className before id
+<div className="card" id="main-card" />
+
+// aria before className
+<nav aria-label="main" className="nav" />
+
+// data before className
+<section data-testid="hero" className="hero" />
+
+// event before id
+<button type="button" onClick={handleSubmit} id="submit-btn" />
+
+// key after id
+<Item id="x" key={k} />
+
+// non-adjacent: className still comes before id even with attributes in between
+<div className="c" data-x="1" data-y="2" id="i" />
+```
+
+### ✓ Correct
+
+```tsx
+<Button className="btn" onClick={handleClick}>Click</Button>
+<div id="main-card" className="card" />
+<nav className="nav" aria-label="main" />
+<section className="hero" data-testid="hero" />
+<button id="submit-btn" type="button" onClick={handleSubmit} />
+<Item key={k} id="x" />
+```
+
+## Limitations
+
+Only the JSX attributes above are checked (`key`, `id`, `className`, `aria-*`, `data-*`, `on*`) — the full 11-group ordering scheme described in [PLAN.md](https://github.com/logue/biome-plugins/blob/main/PLAN.md) is broader.
+
+Vue, Svelte, and plain HTML templates are **not covered**. Biome's GritQL plugin engine currently compiles snippets only against JavaScript/TypeScript (including JSX), CSS, and JSON syntax trees — a `.vue` or `.svelte` file's `<script>` block is reachable this way (see [`enforce-pure-src`](/biome-plugins/rules/enforce-pure-src.md)), but its template markup is not. Template-level attribute ordering will need to wait for Biome to extend GritQL to template languages.
+
+## Source
+
+[`grit/enforce-attribute-order.grit`](https://github.com/logue/biome-plugins/blob/main/grit/enforce-attribute-order.grit)

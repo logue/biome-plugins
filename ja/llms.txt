@@ -1,0 +1,17 @@
+# @logue/biome-plugins
+
+> Custom Biome lint rules written as GritQL plugins
+
+## Guide
+
+- [貢献](/biome-plugins/ja/guide/contributing.md)
+- [はじめに](/biome-plugins/ja/guide/getting-started.md)
+
+## Rules
+
+- [enforce-attribute-order](/biome-plugins/ja/rules/enforce-attribute-order.md): <cds-tag type="purple">warn</cds-tag> JSX の属性は、定められたグループ順で記述しなければなりません。
+- [enforce-pure-src](/biome-plugins/ja/rules/enforce-pure-src.md): <cds-tag type="red">error</cds-tag> src/ ディレクトリには、プロダクション時のコードと、同じ場所に配置された単体テストのみを含める必要があります。 Storybook、デモ、サンドボックスのコンテンツは、src/ ディレクトリの外に配置する必要があります。
+- [ルール一覧](/biome-plugins/ja/rules/index.md): すべてのルールは GritQL で記述され、Biome プラグインとして読み込まれます。 各ルールファイルは独立しているため、必要なものだけを選んで使用できます。
+- [no-null-type](/biome-plugins/ja/rules/no-null-type.md): <cds-tag type="purple">warn</cds-tag> 型注釈の位置では、| null は禁止されています。 存在しない場合は、undefined またはオプションの ? を使用してください。
+- [prefer-union-over-enum](/biome-plugins/ja/rules/prefer-union-over-enum.md): <cds-tag type="red">error</cds-tag> enum および const enum の宣言は禁止されています。代わりにUnion型を使用してください。
+- [vue-multi-word-filename](/biome-plugins/ja/rules/vue-multi-word-filename.md): <cds-tag type="red">error</cds-tag> Vue コンポーネントのファイル名は、複数ワードの PascalCase（2語以上）でなければなりません。

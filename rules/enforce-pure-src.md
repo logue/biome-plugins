@@ -1,0 +1,48 @@
+> For AI agents: the complete documentation index is available at /biome-plugins/llms.txt, the full documentation bundle is available at /biome-plugins/llms-full.txt.
+
+# enforce-pure-src
+
+error
+
+`src/` must contain only production code and co-located unit tests.
+Storybook, demo, and sandbox content must live outside `src/`.
+
+## What it checks
+
+Any import statement **inside a `src/`-rooted file** that resolves to a path
+containing `storybook`, `demo`, `sandbox`, or `preview`.
+
+## Why
+
+A library's `src/` directory represents the published surface of the package.
+Demo and documentation code views the library **from the outside** — as a
+consumer would. Mixing them into `src/` creates two problems:
+
+1. **Accidental inclusion in the bundle.** Bundlers can mis-tree-shake demo
+   code into the production output.
+2. **Blurred responsibility.** It becomes unclear which code ships and which
+   is only for local development.
+
+Place external-perspective content in a sibling directory (`src-docs/`,
+`src-demo/`, etc.) and reference the library as an external module there.
+
+## Examples
+
+### ✗ Incorrect
+
+```ts
+// src/components/Button.ts
+import { ButtonDemo } from "../storybook/ButtonDemo";
+import preview from "../demo/preview";
+```
+
+### ✓ Correct
+
+```ts
+// src-docs/components/ButtonDemo.ts  ← outside src/
+import { Button } from "@logue/my-lib"; // reference as external
+```
+
+## Source
+
+[`grit/enforce-pure-src.grit`](https://github.com/logue/biome-plugins/blob/main/grit/enforce-pure-src.grit)
