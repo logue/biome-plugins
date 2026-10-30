@@ -6,12 +6,12 @@
 <script>{;var defaultLang = "en", langs = ["en","ja"];if (!/bot|spider|crawl|lighthouse/i.test(window.navigator.userAgent)) {;var firstVisitKey = 'rspress-visited', visited = localStorage.getItem(firstVisitKey);if (!visited) {;localStorage.setItem(firstVisitKey, '1');var targetLang = window.navigator.language.split('-')[0], { pathname, search } = window.location, base = "/biome-plugins", cleanPathname = pathname.startsWith(base) ? pathname.slice(base.length) || '/' : pathname, pathSegments = cleanPathname.split('/').filter(Boolean), currentLang = langs.includes(pathSegments[0]) ? pathSegments[0] : defaultLang;if (langs.includes(targetLang) && targetLang !== currentLang) {;var newPathSegments = pathSegments.slice();if (targetLang === defaultLang) {;newPathSegments.splice(0, 1);} else if (currentLang === defaultLang) {;newPathSegments.splice(0, 0, targetLang);} else {;newPathSegments[0] = targetLang;};;var newPathname = '/' + newPathSegments.join('/'), trailingSlash = newPathname !== '/' && cleanPathname.endsWith('/') ? '/' : '';window.location['replace'](base + newPathname + trailingSlash + search);};};};}</script>
 <script>{;const saved = localStorage.getItem('rspress-theme-appearance');const preferDark = window.matchMedia('(prefers-color-scheme: dark)').matches;const defaultTheme = 'auto';const theme = saved === 'light' || saved === 'dark' || saved === 'auto' ? saved : defaultTheme;const isDark = theme === 'auto' ? preferDark : theme === 'dark';document.documentElement.classList.toggle('dark', isDark);document.documentElement.classList.toggle('rp-dark', isDark);document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';}</script>
 <link href="/biome-plugins/static/css/styles.c78bfc5d3d.css" rel="stylesheet">
-<link rel="preload" href="/biome-plugins/static/js/async/route-e2492a1bf008.1442d4aeb5.js" as="script">
-<script defer src="/biome-plugins/static/js/styles.5f8fa4ddd5.js"></script>
-<script defer src="/biome-plugins/static/js/lib-react.9fd0774497.js"></script>
-<script defer src="/biome-plugins/static/js/lib-router.d80fd6e5ca.js"></script>
-<script defer src="/biome-plugins/static/js/z.c171a2d4a0.js"></script>
-<script defer src="/biome-plugins/static/js/index.afe231fc0b.js"></script>
+<link rel="preload" href="/biome-plugins/static/js/async/route-e2492a1bf008.28a253adc2.js" as="script">
+<script defer src="/biome-plugins/static/js/styles.e1a9275009.js"></script>
+<script defer src="/biome-plugins/static/js/lib-react.d29d6c5614.js"></script>
+<script defer src="/biome-plugins/static/js/lib-router.0f5b84280a.js"></script>
+<script defer src="/biome-plugins/static/js/z.377477b8ec.js"></script>
+<script defer src="/biome-plugins/static/js/index.bd100c5492.js"></script>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="generator" content="Rspress v2.0.23">
 <meta name="author" content="Logue">
